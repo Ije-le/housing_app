@@ -1,0 +1,13 @@
+[project]
+name = "housing-app"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "llm>=0.31",
+    "llm-groq>=0.9",
+    "pdf2image>=1.16.0",
+    "pytesseract>=0.3.10",
+    "click>=8.0",
+]

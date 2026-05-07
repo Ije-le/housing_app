@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ item.name }} | Housing Item Explorer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="page-shell detail-shell">
+    <header class="detail-hero">
+      <a class="back-link" href="{{ url_for('index') }}">Back to search</a>
+      <p class="eyebrow">Item detail</p>
+      <h1>{{ item.name }}</h1>
+      <div class="detail-meta">
+        <span>{{ item.group }}</span>
+        <span>{{ item.count }} mentions</span>
+        {% if item.first_mentioned_in %}
+          <span>First seen in {{ item.first_mentioned_in }}</span>
+        {% endif %}
+      </div>
+      <p class="lead">{{ item.summary }}</p>
+      <div class="detail-nav">
+        {% if previous_item %}
+          <a href="{{ url_for('item_detail', slug=previous_item.slug) }}">Previous: {{ previous_item.name }}</a>
+        {% endif %}
+        {% if next_item %}
+          <a href="{{ url_for('item_detail', slug=next_item.slug) }}">Next: {{ next_item.name }}</a>
+        {% endif %}
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Meeting mentions</h2>
+        <span>Dates and note snippets from the meeting records</span>
+      </div>
+
+      {% if item.mentions %}
+        <div class="mention-list">
+          {% for mention in item['mentions'] %}
+            <article class="mention-card">
+              <div class="mention-head">
+                <strong>{{ mention.date or 'Unknown date' }}</strong>
+                {% if mention.filename %}
+                  <span>{{ mention.filename }}</span>
+                {% endif %}
+              </div>
+              <p>{{ mention.notes or 'No note text available for this mention.' }}</p>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty-state">This item is listed in the grouped CSV, but no mention details were found in the summary JSON.</p>
+      {% endif %}
+    </section>
+  </div>
+</body>
+</html>

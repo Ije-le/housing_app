@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Housing Item Explorer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <p class="eyebrow">Housing item explorer</p>
+      <h1>Search items, browse groups, and open the full meeting history.</h1>
+      <p class="lead">Search for an item name or click a category like HVAC, Big Equipment, or Small Equipment to expand the items inside it.</p>
+
+      <form class="search-bar" method="get" action="/">
+        <input
+          type="search"
+          name="q"
+          value="{{ query }}"
+          placeholder="Search for an item, group, or meeting note"
+          aria-label="Search items"
+        >
+        <button type="submit">Search</button>
+      </form>
+
+      <div class="stats">
+        <div><strong>{{ total_items }}</strong><span>items</span></div>
+        <div><strong>{{ total_mentions }}</strong><span>total mentions</span></div>
+        <div><strong>{{ result_count }}</strong><span>matching results</span></div>
+      </div>
+    </header>
+
+    {% if query %}
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Search results</h2>
+          <span>{{ result_count }} item{{ 's' if result_count != 1 else '' }} matched "{{ query }}"</span>
+        </div>
+
+        {% if groups %}
+          <div class="result-grid">
+            {% for group in groups %}
+              <details class="group-card" {% if loop.first %}open{% endif %}>
+                <summary>
+                  <span>{{ group.name }}</span>
+                  <span>{{ group.count }} mentions</span>
+                </summary>
+                <div class="group-items">
+                  {% for item in group['items'] %}
+                    <a class="item-pill" href="{{ url_for('item_detail', slug=item.slug) }}">
+                      <strong>{{ item.name }}</strong>
+                      <span>{{ item.count }}</span>
+                    </a>
+                  {% endfor %}
+                </div>
+              </details>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="empty-state">No items matched your search.</p>
+        {% endif %}
+      </section>
+    {% endif %}
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Category groups</h2>
+        <span>Click a row to reveal the items inside</span>
+      </div>
+
+      <div class="group-table">
+        {% for group in groups %}
+          <details class="group-row" {% if not query and loop.first %}open{% endif %}>
+            <summary>
+              <span class="group-name">{{ group.name }}</span>
+              <span class="group-count">{{ group.count }} mentions</span>
+            </summary>
+            <div class="group-items">
+              {% for item in group['items'] %}
+                <a class="item-pill" href="{{ url_for('item_detail', slug=item.slug) }}">
+                  <strong>{{ item.name }}</strong>
+                  <span>{{ item.count }}</span>
+                </a>
+              {% endfor %}
+            </div>
+          </details>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</body>
+</html>

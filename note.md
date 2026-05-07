@@ -27,3 +27,11 @@ I have manually cleaned all_items_grouped.csv and I have names of items under th
 The idea is the people can either search for individual items or simply click on the rows in the table. Those rows open up to the name of items in that group: boiler, radiatos, vent, etc
 When a user clicks on the items, they are moved to a details page, where the can see all the times that item has come up in meetings with dates, and a summary of what was discussed about the item.
 What would be the steps to do this?
+
+### Next:
+I manually removed all the entries I did not want from the grouped csv. Then I realized that it could not be the basis of my app because I needed it to be more detailed, people had to know how many times an item was mentioned and wht happened those times. So using copilot, I cleaned the initial csv from which I got the grouped csv. We made that into a third csv. This third csv was produced after using the grouoed one as an allow list, so things that did not fall under the categories we had here were weeded out [re-read this an rephrase if needed.]
+This new csv is the basis for the app.
+ ### Up Next:
+ Clean up the app.
+Check the csv and see what's missing.
+Why do the details of the meetings not make any sense?

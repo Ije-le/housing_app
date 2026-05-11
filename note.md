@@ -1,13 +1,14 @@
-First, I downloaded all the available pdfs from 2021 to 2026 and put them in a folder. Then I had copilot produce an extraction script. Because of some inconsistencies in labelling the comments I was interested in, I let copilot know that some comments were labelled under different headers depending on the year. E.g: resident comments under "resident comments" some years and "comments-tenants and general public" other years OR "executive directors reports" some years and "chief executive officers reports" other years.
+First, I downloaded all the available pdfs from January 2020 to March 2026 and put them in a folder.
+My plan was to get a list of all household items and create an app that allowed a user search for those items and see what had been discussed about them in meetings.
+There was no real way to know all the household items mentioned during meetings within this period by nereky looking, so I had copilot produce an extraction script, extract_items.py, that would extract all household items and appliance that had been metioned in the meetings since 2020.
 
-Next, I ran the script with a groq model to keep the data secure. The extraction came in 57 different json files, because there were 57 pdfs. I had copilot merge them in one json file.
-One thing I noticed is that it did not extract the entire text for the sections I requested, it summarized some. Not sure how this affects the entire process, but we'll see.
+There were some problems with this process:
 
-### Up Next: Look through the extracted document and decide if you want to use jus the summaries for your app, if you want to extract all household items mentioned in the json and put them in groups, or how you want your app to work, generally.
+The structure of the meeting minutes had changed over time. The section that held residents comments (which was where most of the complaints about household items were recorded) was labelled "Resident Comments" in some years and "Comments -Tenants and General Public". Another relevant section, which had details on what the Housing Authority is doing about those complaints, had also been changed over time. It was labelled "Executive Directors Report" in some years, and "Chief Executive Officers Report" in other years
+I gave copilot a guide, so that it would note these changes while carrying out the extraction. I asked it to extract specific parts of the minutes that were relevant to the app, including dates, residents comments, executive directors comments.
 
-### NEXT:
-
-First, I extracted all household items that have been mentioned in the document. Copilot wrote a script for that, and I ran the extraction with Groq.
+Next, I ran the script with a groq model to keep the data secure, especially because people were named in these documents. The extraction came in 57 different json files, because there were 57 pdfs. I wanted them in one pdf, so I had copilot merge them in one json file: all_meetings.json. I used groq for this extraction.
+I generated two csvs from this process: one more deatiled csv, another, a csv that h ad otems grouped together.
 After the extraction, I could identify these items that came up frequently;
 Elevator
 Pest control
@@ -15,21 +16,37 @@ Generator
 Food bank
 HVAC
 Cameras
-Garden (water in the garden)
 
-When I spot checked, I saw faucets, handicap handles which suggested everything was not extracted. So we tightened the prompt and got a lot more items. Now, I have more items in the all_items_grouped csv. It places all extracted items in groups, so I can see what falls under big, small, other equipment.
-I noticed there are some misclassifications. Appliances as a header has parking pemrits underneath, for example. Will need to figure out reclassification.
+When I spot checked through the pdfs themselves, I saw faucets, handicap handles appeared in the documents,  but not in my list of extracted items, which suggested not everything was extracted.
+So I tightened the prompt and got a lot more items in the all_items_grouped csv. It places all extracted items in groups, so I can see what falls under big, small, other equipment.
+There were some misclassifications for example, "Appliances" as a header has parking pemrits underneath. So I manually cleaned the all_items_grouped.csv and placed names of items under the category groups that I want. I also created new categories where I felt they were missing.
+
+The app idea I had was one where users can either search for individual items or simply click on the rows in a table beneath the search bar. Those rows open up to the name of items in that category: Big Equipments opens up to elevators, trash dumpster, etc Because of how I wanted this app to work, the grouped csv could not be the basis for my app
+
+# to conclude:
+why?
+what csv did you use insstead?
+when you saw the details opage did not show full sentences, what did you do to clean it up.
+What are the problems with the app currently? the UI is not that great...
+
+
+
+
+
+
+
+
 
 ### Up Next: Reclassify csv. Will you do this manually? Figure out next steps for your app.
 
 
-I have manually cleaned all_items_grouped.csv and I have names of items under the category groups that I want. I want to make a news app, where users can search for items and see how many times they've been mentioned throughout the period. I also want the app to have a table with a set of rows beneath the search bar like this: HVAC, Big equipment, small equipment ..
+I manually cleaned the all_items_grouped.csv and I have names of items under the category groups that I want. I want to make a news app, where users can search for items and see how many times they've been mentioned throughout the period. I also want the app to have a table with a set of rows beneath the search bar like this: HVAC, Big equipment, small equipment ..
 The idea is the people can either search for individual items or simply click on the rows in the table. Those rows open up to the name of items in that group: boiler, radiatos, vent, etc
 When a user clicks on the items, they are moved to a details page, where the can see all the times that item has come up in meetings with dates, and a summary of what was discussed about the item.
 What would be the steps to do this?
 
 ### Next:
-I manually removed all the entries I did not want from the grouped csv. Then I realized that it could not be the basis of my app because I needed it to be more detailed, people had to know how many times an item was mentioned and wht happened those times. So using copilot, I cleaned the initial csv from which I got the grouped csv. We made that into a third csv. This third csv was produced after using the grouoed one as an allow list, so things that did not fall under the categories we had here were weeded out [re-read this an rephrase if needed.]
+I manually removed all the entries I did not want from the grouped csv. Then I realized that it could not be the basis of my app because I needed it to be more detailed, people had to know how many times an item was mentioned and wht happened those times. So using copilot, I cleaned the initial csv from which I got the grouped csv. We made that into a third csv. This third csv was produced after using the grouped one as an allow list, so things that did not fall under the categories we had here were weeded out [re-read this an rephrase if needed.]
 This new csv is the basis for the app.
 
  ### Up Next:

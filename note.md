@@ -1,3 +1,5 @@
+# Notes: newsapps
+
 First, I downloaded all the available pdfs from January 2020 to March 2026 and put them in a folder.
 My plan was to get a list of all household items and create an app that allowed a user search for those items and see what had been discussed about them in meetings.
 There was no real way to know all the household items mentioned during meetings within this period by nereky looking, so I had copilot produce an extraction script, extract_items.py, that would extract all household items and appliance that had been metioned in the meetings since 2020.
@@ -21,40 +23,24 @@ When I spot checked through the pdfs themselves, I saw faucets, handicap handles
 So I tightened the prompt and got a lot more items in the all_items_grouped csv. It places all extracted items in groups, so I can see what falls under big, small, other equipment.
 There were some misclassifications for example, "Appliances" as a header has parking pemrits underneath. So I manually cleaned the all_items_grouped.csv and placed names of items under the category groups that I want. I also created new categories where I felt they were missing.
 
-The app idea I had was one where users can either search for individual items or simply click on the rows in a table beneath the search bar. Those rows open up to the name of items in that category: Big Equipments opens up to elevators, trash dumpster, etc. I used the all_item_grouped.csv as the basis of my news app.
+The app idea I had was one where users can either search for individual items or simply click on the rows in a table beneath the search bar. Those rows open up to the name of items in that category: Big Equipments opens up to elevators, trash dumpster, etc. I used the all_item_grouped.csv as the basis of my news app. I also linked documents, so that users may read through the documents themselves for more context.
 
+A few things were wrong with the app.
+
+One issue was that the details from the minutes, disolayed after each item, made no sense.
+If I search for "door" for example, the excerpts from the pdfs should be displayed on the app to help the user know what was said about a door. 
+The excerpts did show up, but rather than be comprehensive, they looked like this: 
+...nstalled in the lobby to allow easier access into the activity roo...
+I could tell the complete texts were not extracted, so I repeated the process and asked copilot to extract everything. That worked better.
+
+
+
+While I have worked on some of the problems with the apps functionality, there are still some issues currently affecting user experience which i am working on, including, but not limited to the following:
+
+I find that when I search for "window", doors also pop up. Actually, doors mostly pop up. There are more doors than windows in the responses I get, and I think it is because I grouped windows and doors together in the csv with which the app was built. 
+The app also does not take me to a details page when I search for window, especially.
+
+I named the pdf like this: Jan 21 (for January 2021) but this does not help users as far as dates are concerned. One may confuse Jan 21 and January 21st rather than January 2021. I intend to make the dates more clear to improve user experience.
+
+Also, the UI can look better, but this is not the most pressing issue.
                                                                
-
-# to conclude:
-why?
-what csv did you use instead?
-when you saw the details page did not show full sentences, what did you do to clean it up.
-What are the problems with the app currently? the UI is not that great...
-
-
-
-
-
-
-
-
-
-### Up Next: Reclassify csv. Will you do this manually? Figure out next steps for your app.
-
-
-I manually cleaned the all_items_grouped.csv and I have names of items under the category groups that I want. I want to make a news app, where users can search for items and see how many times they've been mentioned throughout the period. I also want the app to have a table with a set of rows beneath the search bar like this: HVAC, Big equipment, small equipment ..
-The idea is the people can either search for individual items or simply click on the rows in the table. Those rows open up to the name of items in that group: boiler, radiatos, vent, etc
-When a user clicks on the items, they are moved to a details page, where the can see all the times that item has come up in meetings with dates, and a summary of what was discussed about the item.
-What would be the steps to do this?
-
-### Next:
-I manually removed all the entries I did not want from the grouped csv. Then I realized that it could not be the basis of my app because I needed it to be more detailed, people had to know how many times an item was mentioned and wht happened those times. So using copilot, I cleaned the initial csv from which I got the grouped csv. We made that into a third csv. This third csv was produced after using the grouped one as an allow list, so things that did not fall under the categories we had here were weeded out [re-read this an rephrase if needed.]
-This new csv is the basis for the app.
-
- ### Up Next:
-Clean up the app.
-Check the csv and see what's missing.
-Why do the details of the meetings not make any sense?
-
-## Next
-When I type an item in the search bar, I want to immediately see all the times that they were mentioned right under the search bar

@@ -122,13 +122,13 @@ def build_summary(name: str, count: int, mentions: list[dict[str, Any]], fallbac
         snippets = [mention["notes"] for mention in mentions if mention["notes"]]
         sample_notes = "; ".join(snippets[:3]) if snippets else fallback_note
         if sample_notes:
-            return f"{name.title()} was mentioned {count} times {date_range}. Notes: {sample_notes}"
-        return f"{name.title()} was mentioned {count} times {date_range}."
+            return f"{name.title()} appears in meeting records {date_range}. Notes: {sample_notes}"
+        return f"{name.title()} appears in meeting records {date_range}."
 
     if fallback_note:
-        return f"{name.title()} was mentioned {count} times. Example note: {fallback_note}"
+        return f"{name.title()} appears in meeting records. Example note: {fallback_note}"
 
-    return f"{name.title()} was mentioned {count} times in the meeting records."
+    return f"{name.title()} appears in the meeting records."
 
 
 def build_catalog() -> dict[str, Any]:

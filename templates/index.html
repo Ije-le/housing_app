@@ -18,24 +18,17 @@
           type="search"
           name="q"
           value="{{ query }}"
-          placeholder="Search for an item, group, or meeting note"
+          placeholder="Search for an item or category. E.g. window, roof or appliances"
           aria-label="Search items"
         >
         <button type="submit">Search</button>
       </form>
-
-      <div class="stats">
-        <div><strong>{{ total_items }}</strong><span>items</span></div>
-        <div><strong>{{ total_mentions }}</strong><span>total mentions</span></div>
-        <div><strong>{{ result_count }}</strong><span>matching results</span></div>
-      </div>
     </header>
 
     {% if query %}
       <section class="panel">
         <div class="panel-header">
-          <h2>Search results</h2>
-          <span>{{ result_count }} item{{ 's' if result_count != 1 else '' }} matched "{{ query }}"</span>
+          <h2>{{ result_count }} result{{ 's' if result_count != 1 else '' }} for "{{ query }}"</h2>
         </div>
 
         {% if search_results %}
@@ -45,7 +38,6 @@
                 <div class="search-result-head">
                   <div>
                     <h3>{{ item.name }}</h3>
-                    <p>{{ item.count }} mention{{ 's' if item.count != 1 else '' }} across the meetings</p>
                   </div>
                   <a class="item-pill item-pill-link" href="{{ url_for('item_detail', slug=item.slug) }}">Open detail page</a>
                 </div>
@@ -87,13 +79,11 @@
           <details class="group-row" {% if not query and loop.first %}open{% endif %}>
             <summary>
               <span class="group-name">{{ group.name }}</span>
-              <span class="group-count">{{ group.count }} mentions</span>
             </summary>
             <div class="group-items">
               {% for item in group['items'] %}
                 <a class="item-pill" href="{{ url_for('item_detail', slug=item.slug) }}">
                   <strong>{{ item.name }}</strong>
-                  <span>{{ item.count }}</span>
                 </a>
               {% endfor %}
             </div>

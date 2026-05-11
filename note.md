@@ -5,7 +5,7 @@ One thing I noticed is that it did not extract the entire text for the sections 
 
 ### Up Next: Look through the extracted document and decide if you want to use jus the summaries for your app, if you want to extract all household items mentioned in the json and put them in groups, or how you want your app to work, generally.
 
-NEXT:
+### NEXT:
 
 First, I extracted all household items that have been mentioned in the document. Copilot wrote a script for that, and I ran the extraction with Groq.
 After the extraction, I could identify these items that came up frequently;
@@ -31,7 +31,11 @@ What would be the steps to do this?
 ### Next:
 I manually removed all the entries I did not want from the grouped csv. Then I realized that it could not be the basis of my app because I needed it to be more detailed, people had to know how many times an item was mentioned and wht happened those times. So using copilot, I cleaned the initial csv from which I got the grouped csv. We made that into a third csv. This third csv was produced after using the grouoed one as an allow list, so things that did not fall under the categories we had here were weeded out [re-read this an rephrase if needed.]
 This new csv is the basis for the app.
+
  ### Up Next:
- Clean up the app.
+Clean up the app.
 Check the csv and see what's missing.
 Why do the details of the meetings not make any sense?
+
+## Next
+When I type an item in the search bar, I want to immediately see all the times that they were mentioned right under the search bar

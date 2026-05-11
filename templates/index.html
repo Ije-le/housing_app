@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Housing Item Explorer</title>
+  <title>Attick Towers Housing App</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
   <div class="page-shell">
     <header class="hero">
-      <p class="eyebrow">Housing item explorer</p>
-      <h1>Search items, browse groups, and open the full meeting history.</h1>
-      <p class="lead">Search for an item name or click a category like HVAC, Big Equipment, or Small Equipment to expand the items inside it.</p>
+      <p class="eyebrow">Attick Towers Housing App</p>
+      <h1>Search household items at Attick Towers</h1>
+      <p class="lead">Type in an item name or click a category like HVAC, Big Equipment, or Small Equipment to expand item list.</p>
 
       <form class="search-bar" method="get" action="/">
         <input
@@ -38,23 +38,36 @@
           <span>{{ result_count }} item{{ 's' if result_count != 1 else '' }} matched "{{ query }}"</span>
         </div>
 
-        {% if groups %}
-          <div class="result-grid">
-            {% for group in groups %}
-              <details class="group-card" {% if loop.first %}open{% endif %}>
-                <summary>
-                  <span>{{ group.name }}</span>
-                  <span>{{ group.count }} mentions</span>
-                </summary>
-                <div class="group-items">
-                  {% for item in group['items'] %}
-                    <a class="item-pill" href="{{ url_for('item_detail', slug=item.slug) }}">
-                      <strong>{{ item.name }}</strong>
-                      <span>{{ item.count }}</span>
-                    </a>
-                  {% endfor %}
+        {% if search_results %}
+          <div class="search-results-list">
+            {% for item in search_results %}
+              <article class="search-result-card">
+                <div class="search-result-head">
+                  <div>
+                    <h3>{{ item.name }}</h3>
+                    <p>{{ item.count }} mention{{ 's' if item.count != 1 else '' }} across the meetings</p>
+                  </div>
+                  <a class="item-pill item-pill-link" href="{{ url_for('item_detail', slug=item.slug) }}">Open detail page</a>
                 </div>
-              </details>
+
+                {% if item.mentions %}
+                  <div class="mention-list mention-list-compact">
+                    {% for mention in item.mentions %}
+                      <article class="mention-card mention-card-compact">
+                        <div class="mention-head">
+                          <strong>{{ mention.date or 'Unknown date' }}</strong>
+                          {% if mention.filename %}
+                            <a class="pdf-link" href="{{ url_for('pdf_file', filename=mention.filename) }}" target="_blank" rel="noopener noreferrer">{{ mention.filename }}</a>
+                          {% endif %}
+                        </div>
+                        <p>{{ mention.notes or 'No note text available for this mention.' }}</p>
+                      </article>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <p class="empty-state">No mention details were found for this item.</p>
+                {% endif %}
+              </article>
             {% endfor %}
           </div>
         {% else %}

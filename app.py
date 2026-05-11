@@ -8,12 +8,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from flask import Flask, abort, render_template, request, url_for
+from flask import Flask, abort, redirect, render_template, request, send_from_directory, url_for
 
 
 BASE_DIR = Path(__file__).resolve().parent
 GROUPED_CSV_PATH = BASE_DIR / "extracted_json" / "all_items_grouped.csv"
 ITEMS_JSON_PATH = BASE_DIR / "extracted_json" / "cleaned_all_items_summary.json"
+PDF_DIR = BASE_DIR / "pdfs" / "housing_authority"
 
 
 app = Flask(__name__)
@@ -199,6 +200,26 @@ def search_items(items: list[dict[str, Any]], query: str) -> list[dict[str, Any]
     return matches
 
 
+def exact_item_match(items: list[dict[str, Any]], query: str) -> dict[str, Any] | None:
+    normalized = query.strip().lower()
+    if not normalized:
+        return None
+
+    query_slug = slugify(query)
+    for item in items:
+        if normalized == item["name"].strip().lower() or query_slug == item["slug"]:
+            return item
+
+    return None
+
+
+@app.route("/pdf/<path:filename>")
+def pdf_file(filename: str):
+    if not PDF_DIR.exists():
+        abort(404)
+    return send_from_directory(PDF_DIR, filename)
+
+
 CATALOG = build_catalog()
 
 
@@ -206,6 +227,10 @@ CATALOG = build_catalog()
 def index() -> str:
     query = request.args.get("q", "").strip()
     all_items = CATALOG["all_items"]
+    exact_match = exact_item_match(all_items, query)
+    if exact_match:
+        return redirect(url_for("item_detail", slug=exact_match["slug"]))
+
     filtered_items = search_items(all_items, query)
 
     grouped_matches: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -234,6 +259,7 @@ def index() -> str:
         "index.html",
         query=query,
         groups=visible_groups,
+        search_results=filtered_items,
         total_items=len(all_items),
         total_mentions=sum(item["count"] for item in all_items),
         result_count=len(filtered_items),

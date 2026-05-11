@@ -64,6 +64,10 @@ a {
   letter-spacing: -0.03em;
 }
 
+.hero h1 {
+  font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+}
+
 .eyebrow {
   margin: 0 0 12px;
   text-transform: uppercase;
@@ -77,8 +81,8 @@ a {
   max-width: 68ch;
   margin: 16px 0 0;
   color: var(--muted);
-  font-size: 1.05rem;
-  line-height: 1.6;
+  font-size: 0.96rem;
+  line-height: 1.5;
 }
 
 .search-bar {
@@ -169,6 +173,49 @@ a {
 .mention-list {
   display: grid;
   gap: 12px;
+}
+
+.search-results-list {
+  display: grid;
+  gap: 14px;
+}
+
+.search-result-card {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.78);
+  padding: 18px 20px;
+}
+
+.search-result-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.search-result-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.search-result-head p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.item-pill-link {
+  white-space: nowrap;
+}
+
+.mention-list-compact {
+  gap: 10px;
+}
+
+.mention-card-compact {
+  padding: 14px 16px;
 }
 
 .group-row,

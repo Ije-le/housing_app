@@ -43,7 +43,7 @@
               <div class="mention-head">
                 <strong>{{ mention.date or 'Unknown date' }}</strong>
                 {% if mention.filename %}
-                  <span>{{ mention.filename }}</span>
+                  <a class="pdf-link" href="{{ url_for('pdf_file', filename=mention.filename) }}" target="_blank" rel="noopener noreferrer">{{ mention.filename }}</a>
                 {% endif %}
               </div>
               <p>{{ mention.notes or 'No note text available for this mention.' }}</p>

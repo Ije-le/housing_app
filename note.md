@@ -25,7 +25,7 @@ There were some misclassifications for example, "Appliances" as a header has par
 
 The app idea I had was one where users can either search for individual items or simply click on the rows in a table beneath the search bar. Those rows open up to the name of items in that category: Big Equipments opens up to elevators, trash dumpster, etc. I used the all_item_grouped.csv as the basis of my news app. I also linked documents, so that users may read through the documents themselves for more context.
 
-A few things were wrong with the app.
+# A few things were wrong with the app:
 
 One issue was that the details from the minutes, disolayed after each item, made no sense.
 If I search for "door" for example, the excerpts from the pdfs should be displayed on the app to help the user know what was said about a door. 
@@ -34,11 +34,12 @@ The excerpts did show up, but rather than be comprehensive, they looked like thi
 I could tell the complete texts were not extracted, so I repeated the process and asked copilot to extract everything. That worked better.
 
 
-
 While I have worked on some of the problems with the apps functionality, there are still some issues currently affecting user experience which i am working on, including, but not limited to the following:
 
 I find that when I search for "window", doors also pop up. Actually, doors mostly pop up. There are more doors than windows in the responses I get, and I think it is because I grouped windows and doors together in the csv with which the app was built. 
 The app also does not take me to a details page when I search for window, especially.
+
+I noticed a similar problem with other keywords: food banks retruns information for arts and craft.
 
 I named the pdf like this: Jan 21 (for January 2021) but this does not help users as far as dates are concerned. One may confuse Jan 21 and January 21st rather than January 2021. I intend to make the dates more clear to improve user experience.
 

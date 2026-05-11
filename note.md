@@ -17,16 +17,18 @@ Food bank
 HVAC
 Cameras
 
-When I spot checked through the pdfs themselves, I saw faucets, handicap handles appeared in the documents,  but not in my list of extracted items, which suggested not everything was extracted.
+When I spot checked through the pdfs themselves, I saw faucets, handicap handles and some other appliances appeared in the documents,  but not in my list of extracted items, which suggested that not everything was extracted.
 So I tightened the prompt and got a lot more items in the all_items_grouped csv. It places all extracted items in groups, so I can see what falls under big, small, other equipment.
 There were some misclassifications for example, "Appliances" as a header has parking pemrits underneath. So I manually cleaned the all_items_grouped.csv and placed names of items under the category groups that I want. I also created new categories where I felt they were missing.
 
-The app idea I had was one where users can either search for individual items or simply click on the rows in a table beneath the search bar. Those rows open up to the name of items in that category: Big Equipments opens up to elevators, trash dumpster, etc Because of how I wanted this app to work, the grouped csv could not be the basis for my app
+The app idea I had was one where users can either search for individual items or simply click on the rows in a table beneath the search bar. Those rows open up to the name of items in that category: Big Equipments opens up to elevators, trash dumpster, etc. I used the all_item_grouped.csv as the basis of my news app.
+
+                                                               
 
 # to conclude:
 why?
-what csv did you use insstead?
-when you saw the details opage did not show full sentences, what did you do to clean it up.
+what csv did you use instead?
+when you saw the details page did not show full sentences, what did you do to clean it up.
 What are the problems with the app currently? the UI is not that great...
 
 

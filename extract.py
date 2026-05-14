@@ -11,6 +11,7 @@ import click
 
 PDF_DIR = "./pdfs/housing_authority"
 OUTPUT_DIR = "./extracted_json"
+ALL_MEETINGS_FILE = Path(OUTPUT_DIR) / "all_meetings.json"
 
 Path(OUTPUT_DIR).mkdir(exist_ok=True)
 
@@ -188,19 +189,17 @@ print(f"Found {len(pdf_files)} PDFs\n")
 def main(model):
     """Extract meeting minutes from PDFs using OCR + LLM parsing."""
     print(f"Using model: {model}\n")
+
+    all_meetings = []
     
     for pdf_path in sorted(pdf_files):
-        out_file = Path(OUTPUT_DIR) / (pdf_path.stem + ".json")
-        
-        if out_file.exists():
-            print(f"Skipping {pdf_path.name} (already processed)")
-            continue
-        
         result = parse_pdf_to_json(pdf_path, model=model)
         
         if result:
-            out_file.write_text(json.dumps(result, indent=2), encoding="utf-8")
-            print(f"  ✓ → {out_file.name}")
+            all_meetings.append(result)
+
+    ALL_MEETINGS_FILE.write_text(json.dumps(all_meetings, indent=2), encoding="utf-8")
+    print(f"Wrote {len(all_meetings)} meetings to {ALL_MEETINGS_FILE.name}")
     
     print("\nDone.")
 

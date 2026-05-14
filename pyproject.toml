@@ -8,6 +8,7 @@ dependencies = [
     "flask>=3.0.0",
     "llm>=0.31",
     "llm-groq>=0.9",
+    "llm-anthropic>=0.17.0",
     "pdf2image>=1.16.0",
     "pytesseract>=0.3.10",
     "click>=8.0",

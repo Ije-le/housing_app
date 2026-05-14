@@ -130,11 +130,9 @@ def parse_pdf_to_json(pdf_path, model=DEFAULT_MODEL):
         prompt = f"""Extract meeting minutes information from the following text and return ONLY a valid JSON object with these exact fields:
 - filename: the PDF filename
 - date: the meeting date (extract date if mentioned, or "Unknown Date")
-- attendees: list of attendee names/titles
 - residents_comments: list of resident comments (handle both "residents comments" and "comments-tenant and general public" sections)
-- executive_directors_report: list of points from executive director report (or "chief executive officers report")
-- decisions: list of decisions made
-- raw_text: the original text
+- executive_directors_report: list of points from executive director report (or "chief executive officers report") that relate ONLY to maintenance, repairs, broken appliances, building systems, or management response to maintenance issues. Ignore administrative, procedural, or non-maintenance topics. If no maintenance topics found, return empty list.
+- decisions: list of decisions made that relate ONLY to maintenance, repairs, broken appliances, building systems, or allocating funds/resources for building maintenance. Ignore administrative, procedural, or non-maintenance decisions. If no maintenance-related decisions found, return empty list.
 
 Return ONLY the JSON object, no other text.
 

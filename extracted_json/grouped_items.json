@@ -1,0 +1,298 @@
+{
+  "HVAC": [
+    {
+      "name": "Air Conditioner",
+      "canonical": "air conditioner",
+      "count": 1,
+      "first_mentioned_filename": "June 2024.pdf",
+      "first_mentioned_date": "June 27, 2024",
+      "example_snippet": "vacancies) HVAC chiller outage Work on the risers AC work completed Working on drywall replacement Motion approved to draw down the shortfall grant for $105,839.00 Motion approved for an invoice for $7,"
+    }
+  ],
+  "Electrical": [
+    {
+      "name": "Camera",
+      "canonical": "camera",
+      "count": 5,
+      "first_mentioned_filename": "July 2020.pdf",
+      "first_mentioned_date": "July 23, 2020",
+      "example_snippet": "ays Working on a call system with Gilson Property cameras have been updated to allow staff to watch the cameras via remote 24 hours a day The building is being cleaned 3 times a week by 2 different companies"
+    },
+    {
+      "name": "Alarm System",
+      "canonical": "alarm system",
+      "count": 3,
+      "first_mentioned_filename": "December 2023.pdf",
+      "first_mentioned_date": "December 14, 2023",
+      "example_snippet": "e of this type of emergency. A resident heard the alarm going off and reported it to authorities. Major repairs completed: gas valve and water pipe Ramp repaired Inspection by the city on Monday Sprinkler/"
+    },
+    {
+      "name": "Light",
+      "canonical": "light",
+      "count": 3,
+      "first_mentioned_filename": "January 2020.pdf",
+      "first_mentioned_date": "January 23, 2020",
+      "example_snippet": "ond $8k-$10k, City approvals, and installation of lighting"
+    },
+    {
+      "name": "Fire System",
+      "canonical": "fire system",
+      "count": 2,
+      "first_mentioned_filename": "March 2025.pdf",
+      "first_mentioned_date": "March 27, 2025",
+      "example_snippet": "nquired if an announcement could be made when the fire alarm system at Attick Towers goes off and is cleared. A resident mentioned an article in the New York Times concerning the HACCP. A resident noted that th"
+    }
+  ],
+  "Big Equipment": [
+    {
+      "name": "Elevator",
+      "canonical": "elevator",
+      "count": 20,
+      "first_mentioned_filename": "April 2020.pdf",
+      "first_mentioned_date": "April 23, 2020",
+      "example_snippet": "l of payment of invoices over $2,000.00 including Elevator maintenance: $4,225.25 and Teleplus Security: $3,064.55, approved unanimously by a vote of 4-0"
+    },
+    {
+      "name": "Hvac System",
+      "canonical": "hvac system",
+      "count": 10,
+      "first_mentioned_filename": "April 2024.pdf",
+      "first_mentioned_date": "April 25, 2024",
+      "example_snippet": "perations, capital improvements and replacements, HVAC and plumbing upgrades, water treatment (cooling tower), and maintenance and operational materials"
+    },
+    {
+      "name": "Boiler",
+      "canonical": "boiler",
+      "count": 6,
+      "first_mentioned_filename": "January 2024.pdf",
+      "first_mentioned_date": "January 25, 2024",
+      "example_snippet": "me down, tree fell down on the HVAC unit (outside boiler), and the insurance deductible was 1% of $15M Repairing of piping on the first floor (working on for four months) Unit 101 - on August 1st will be to"
+    },
+    {
+      "name": "Generator",
+      "canonical": "generator",
+      "count": 6,
+      "first_mentioned_filename": "April 2024.pdf",
+      "first_mentioned_date": "April 25, 2024",
+      "example_snippet": "ved elevator certificate (expires 12/2022) Passed generator inspection Snow removal services had been provided at Attick Towers for the last 10 years by the city; this year snow removal services were not provi"
+    },
+    {
+      "name": "Trash Dumpster",
+      "canonical": "trash dumpster",
+      "count": 3,
+      "first_mentioned_filename": "February 2023.pdf",
+      "first_mentioned_date": "February 23, 2023",
+      "example_snippet": "3 newly leased units, and 4 units ready to lease Trash chute proposal Continued work on the lobby Parking concerns (parking stickers and enforcement) Motion approved to pay invoices over $4,000 including Lowes..."
+    },
+    {
+      "name": "Chiller",
+      "canonical": "chiller",
+      "count": 2,
+      "first_mentioned_filename": "June 2024.pdf",
+      "first_mentioned_date": "June 27, 2024",
+      "example_snippet": "e first floor is 95% completed. Problems with the chiller were repaired on Saturday. Two more units being prepared for leasing. Parking lot restriping proposal approved. Work to begin soon. Parking lot restr"
+    },
+    {
+      "name": "Roof",
+      "canonical": "roof",
+      "count": 2,
+      "first_mentioned_filename": "February 2024.pdf",
+      "first_mentioned_date": "February 22, 2024",
+      "example_snippet": "epairs needed Reinspection scheduled for February Roof leak repair completed Resident stuck in elevator RFP issued for elevator replacement Apply for emergency grant from HUD for the boiler installation P"
+    }
+  ],
+  "Services": [
+    {
+      "name": "Maintenance",
+      "canonical": "maintenance",
+      "count": 24,
+      "first_mentioned_filename": "April 2020.pdf",
+      "first_mentioned_date": "April 23, 2020",
+      "example_snippet": "ouncil account), and October and December minutes Maintenance work orders discussed City inspections identified a lot of needed repairs Re-inspection of emergency units Parking permits have expired and have been"
+    },
+    {
+      "name": "Security",
+      "canonical": "security",
+      "count": 5,
+      "first_mentioned_filename": "April 2020.pdf",
+      "first_mentioned_date": "April 23, 2020",
+      "example_snippet": "ding Elevator maintenance: $4,225.25 and Teleplus Security: $3,064.55, approved unanimously by a vote of 4-0"
+    },
+    {
+      "name": "Cleaning",
+      "canonical": "cleaning",
+      "count": 4,
+      "first_mentioned_filename": "March 2020.pdf",
+      "first_mentioned_date": "March 30, 2020",
+      "example_snippet": "s have stated they feel abandoned by office staff Cleaners doing a great job A lot of relatives as well as non-relative visitors coming in and out of the building Bus schedules to grocery store Posting of fly"
+    },
+    {
+      "name": "Pest Control",
+      "canonical": "pest control",
+      "count": 4,
+      "first_mentioned_filename": "December 2022.pdf",
+      "first_mentioned_date": "December 15, 2022",
+      "example_snippet": "rminations should continue. It was noted that the pest control company comes out every Thursday to perform exterminations. Residents should contact the office noting any problems that need to be addressed. Approv"
+    },
+    {
+      "name": "Landscaping",
+      "canonical": "landscaping",
+      "count": 3,
+      "first_mentioned_filename": "January 2022.pdf",
+      "first_mentioned_date": "January 27, 2022",
+      "example_snippet": "ervices will be utilized by Greentech the current landscape contractor. Covid testing of the waste water ended in December with no noted positive tests reported. Approved payment to Ernie's Lock for $2,312.40..."
+    },
+    {
+      "name": "Water Treatment",
+      "canonical": "water treatment",
+      "count": 2,
+      "first_mentioned_filename": "July 2021.pdf",
+      "first_mentioned_date": "July 22, 2021",
+      "example_snippet": "nts and replacements, HVAC and plumbing upgrades, water treatment (cooling tower), and maintenance and operational materials"
+    }
+  ],
+  "Wall Openings": [
+    {
+      "name": "Door",
+      "canonical": "door",
+      "count": 3,
+      "first_mentioned_filename": "July 2021.pdf",
+      "first_mentioned_date": "July 22, 2021",
+      "example_snippet": "ttick Towers liked the new Board meeting entrance door. Water usage is very high at Attick Towers Site inspection performed at Attick Towers - qualified for shared savings program Goal to bring water bill"
+    },
+    {
+      "name": "Window",
+      "canonical": "window",
+      "count": 2,
+      "first_mentioned_filename": "October 2022.pdf",
+      "first_mentioned_date": "October 27, 2022",
+      "example_snippet": "nty-one vacant units at Attick Towers Dining room window (issue discussed) Speed bumps painting has been completed Fence line work Annual elevator tests scheduled in October Approved payment of invoice to G"
+    },
+    {
+      "name": "Gate",
+      "canonical": "gate",
+      "count": 1,
+      "first_mentioned_filename": "March 2025.pdf",
+      "first_mentioned_date": "March 27, 2025",
+      "example_snippet": "nd safety grants for security, camera system, and gates. Boiler replacement. Latest property updates (Property Manager). Approved payment of invoice to TK Elevators for $483,094.82. Approved payment of inv"
+    }
+  ],
+  "Plumbing": [
+    {
+      "name": "Pipe",
+      "canonical": "pipe",
+      "count": 11,
+      "first_mentioned_filename": "December 2023.pdf",
+      "first_mentioned_date": "December 14, 2023",
+      "example_snippet": "ly. Received a bid for three units with extensive plumbing issues. There will be an RFP sent out. There are no active residents living in the three units, and HUD is being requested to approve of the units to"
+    },
+    {
+      "name": "Leak",
+      "canonical": "leak",
+      "count": 4,
+      "first_mentioned_filename": "February 2024.pdf",
+      "first_mentioned_date": "February 22, 2024",
+      "example_snippet": "with a $1,000 deductible; second claim for sewage leak damage to furniture, property, and carpet currently being evaluated Bedbug infestation concerning a resident - infestation is spreading to other unit"
+    },
+    {
+      "name": "Faucet",
+      "canonical": "faucet",
+      "count": 2,
+      "first_mentioned_filename": "January 2020.pdf",
+      "first_mentioned_date": "January 23, 2020",
+      "example_snippet": "e garden area A resident discussed replacement of faucets, handicap handles, garden (catch rain water), and September minutes A resident discussed saving money A resident discussed resident councilmembers re"
+    },
+    {
+      "name": "Sprinkler System",
+      "canonical": "sprinkler system",
+      "count": 2,
+      "first_mentioned_filename": "December 2023.pdf",
+      "first_mentioned_date": "December 14, 2023",
+      "example_snippet": "pe Ramp repaired Inspection by the city on Monday Sprinkler/alarm inspection Approved payment of invoices over $4,000, including TK Elevators for $4,006.38"
+    },
+    {
+      "name": "Tub",
+      "canonical": "tub",
+      "count": 2,
+      "first_mentioned_filename": "March 2023.pdf",
+      "first_mentioned_date": "March 23, 2023",
+      "example_snippet": "ning the RAD Board. Ms. Norman discussed her bath tub needing to be replaced. HACCP awarded $357K to be utilized for the HVAC/plumbing replacement HACCP awarded $414K to be utilized for the elevator repl"
+    },
+    {
+      "name": "Drain",
+      "canonical": "drain",
+      "count": 1,
+      "first_mentioned_filename": "February 2020.pdf",
+      "first_mentioned_date": "February 27, 2020",
+      "example_snippet": "on of handicap accessible foot pedal knobs. Storm drain management. Re-inspection of emergency items. Focusing on roach infestations of code enforcement units. One unit with bedbugs treated successfully. R"
+    },
+    {
+      "name": "Shower",
+      "canonical": "shower",
+      "count": 1,
+      "first_mentioned_filename": "July 2021.pdf",
+      "first_mentioned_date": "July 22, 2021",
+      "example_snippet": "oal to bring water bill down 32% Replace toilets, shower heads, and rebuild faucets Current toilets are inefficient - uses 3 gallons flush capacity, can use up to 6 gallons per flush Replacement of fixtures"
+    },
+    {
+      "name": "Toilet",
+      "canonical": "toilet",
+      "count": 1,
+      "first_mentioned_filename": "July 2021.pdf",
+      "first_mentioned_date": "July 22, 2021",
+      "example_snippet": "program Goal to bring water bill down 32% Replace toilets, shower heads, and rebuild faucets Current toilets are inefficient - uses 3 gallons flush capacity, can use up to 6 gallons per flush Replacement of..."
+    }
+  ],
+  "Accessibility and safety features": [
+    {
+      "name": "Emergency Exit",
+      "canonical": "emergency exit",
+      "count": 1,
+      "first_mentioned_filename": "April 2025.pdf",
+      "first_mentioned_date": "April 24, 2025",
+      "example_snippet": "a long time to get hot. Annual inspection updates Egress updates Approval of invoices over $4,000 including TK Elevators for $4,146.60, unanimously approved by a vote of 5-0."
+    },
+    {
+      "name": "Grab Bar",
+      "canonical": "grab bar",
+      "count": 1,
+      "first_mentioned_filename": "September 2025.pdf",
+      "first_mentioned_date": "September 25, 2025",
+      "example_snippet": "s complaints. Ms. Bay discussed visitors and hand railing. There are 103 occupied units and 5 vacancies. Cargo elevator floor has been laid. Tree work being performed. F & B laundry equipment. Wild life cont"
+    },
+    {
+      "name": "Handicap Handle",
+      "canonical": "handicap handle",
+      "count": 1,
+      "first_mentioned_filename": "January 2020.pdf",
+      "first_mentioned_date": "January 23, 2020",
+      "example_snippet": "area A resident discussed replacement of faucets, handicap handles, garden (catch rain water), and September minutes A resident discussed saving money A resident discussed resident councilmembers receiving stipends A"
+    }
+  ],
+  "Small Equipment": [
+    {
+      "name": "Laundry Machine",
+      "canonical": "laundry machine",
+      "count": 4,
+      "first_mentioned_filename": "June 2025.pdf",
+      "first_mentioned_date": "June 26, 2025",
+      "example_snippet": "the food distribution from various organizations Laundry machines: Converting the laundry and dryer machines from coin to card acceptance Cleaning company doing a deep cleaning of the building Security grant: Applyi..."
+    },
+    {
+      "name": "Fire Extinguisher",
+      "canonical": "fire extinguisher",
+      "count": 3,
+      "first_mentioned_filename": "April 2024.pdf",
+      "first_mentioned_date": "April 25, 2024",
+      "example_snippet": "iture in the lobby Planned parking lot restriping Fire extinguisher inspection RSC piping contract for the 1st floor Motion unanimously approved by a vote of 5-0 to approve payments of invoices over $4,000, including..."
+    },
+    {
+      "name": "Solar Panels",
+      "canonical": "solar panels",
+      "count": 1,
+      "first_mentioned_filename": "February 2026.pdf",
+      "first_mentioned_date": "February 26, 2026",
+      "example_snippet": "ine concerning what is going on in the community. Solar panels discussed - motion made to approve solar panels on both the side and top of the building Complaints to be worked on with Mr. Kelly and Mr. Taylor Mot"
+    }
+  ]
+}

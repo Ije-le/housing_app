@@ -29,6 +29,137 @@ CATEGORIES = [
     "Other"
 ]
 
+# Canonical name mappings to collapse variants
+CANONICAL_MAPPING = {
+    # Fire systems
+    "fire alarm": "fire system",
+    "fire alarm system": "fire system",
+    "fire protection system": "fire system",
+    "fire protection": "fire system",
+    "fire suppression system": "fire system",
+    "alarms": "fire system",
+    "smoke detector / fire response": "fire system",
+    "security alarm": "security system",
+    
+    # Laundry
+    "dryer": "laundry equipment",
+    "washer": "laundry equipment",
+    "laundry facility": "laundry equipment",
+    "laundry machines": "laundry equipment",
+    "washer and dryers": "laundry equipment",
+    "washing machines": "laundry equipment",
+    "laundry": "laundry equipment",
+    "laundry room": "laundry equipment",
+    
+    # HVAC
+    "boiler": "hvac system",
+    "cooling tower": "hvac system",
+    "hvac units": "hvac system",
+    "hvac unit": "hvac system",
+    "ac": "hvac system",
+    "boiler system": "hvac system",
+    "chiller": "hvac system",
+    "hvac": "hvac system",
+    "hvac chiller": "hvac system",
+    "hvac unit / boiler": "hvac system",
+    "hvac system": "hvac system",
+    
+    # Elevator
+    "cargo elevator floor": "elevator",
+    "elevator doors": "elevator",
+    
+    # Plumbing
+    "faucets": "faucet",
+    "shower heads": "shower head",
+    "toilets": "toilet",
+    "plumbing system": "plumbing",
+    "plumbing systems": "plumbing",
+    "riser pipes": "risers",
+    "water pipe": "water system",
+    "water heating": "water system",
+    "water heater / hot water": "water system",
+    "water system (garden area)": "water system",
+    
+    # Electrical/Cameras
+    "property cameras": "cameras",
+    "surveillance system": "cameras",
+    "security camera system": "cameras",
+    "security cameras": "cameras",
+    "lights": "lighting",
+    "alarm": "alarm system",
+    
+    # Parking
+    "parking area": "parking lot",
+    
+    # Pest/Infestation control
+    "roach infestation": "pest control",
+    "bedbug infestation": "pest control",
+    "bedbugs": "pest control",
+    "bed bugs": "pest control",
+    "pest infestation": "pest control",
+    
+    # Building structure/components
+    "building structure": "building",
+    "structural system": "building",
+    "residential unit": "building",
+    "stacks": "building",
+    "posts": "building",
+    "bulletin board": "building",
+    "capital improvements": "building",
+    "unit renovation": "building",
+    "building cleanliness": "building",
+    "building inspection": "building",
+    
+    # First floor
+    "first floor construction": "first floor",
+    
+    # Maintenance
+    "maintenance and operational materials": "maintenance",
+    "maintenance work orders": "maintenance",
+    
+    # Mold
+    "molding": "mold",
+    
+    # Trash/waste
+    "trash chute": "trash disposal",
+    "chute room": "trash disposal",
+    "vapor deodorizing system": "trash disposal",
+    "food delivery boxes": "trash disposal",
+    
+    # Wildlife
+    "wildlife": "wildlife control",
+    
+    # Emergency/safety
+    "emergency items": "emergency",
+    "emergency units": "emergency",
+    
+    # Sprinkler systems
+    "sprinkler system": "sprinkler",
+    
+    # Garden
+    "garden rainwater system": "garden",
+    
+    # Dining
+    "dining room repairs": "dining room",
+    
+    # Water damage
+    "carpet": "water damage",
+    "leak": "water damage",
+    
+    # Trees
+    "tree": "trees",
+    
+    # Doors/Locks
+    "locks": "entrance door",
+    
+    # Construction
+    "construction permit": "construction",
+    "construction bond": "construction",
+    
+    # Other consolidations
+    "dining room / community room": "community room",
+}
+
 def load_meetings(path: Path) -> list:
     """Load all_meetings.json."""
     with open(path, "r", encoding="utf-8") as f:
@@ -111,6 +242,11 @@ def normalize_category(cat: str) -> str:
             return valid_cat
     return "Other"
 
+def canonicalize_name(name: str) -> str:
+    """Map item name variants to canonical names."""
+    name_lower = name.lower().strip()
+    return CANONICAL_MAPPING.get(name_lower, name_lower)
+
 def safe_parse_date(date_str: str) -> datetime:
     """Try to parse date string."""
     if not date_str or date_str == "Unknown Date":
@@ -124,6 +260,40 @@ def safe_parse_date(date_str: str) -> datetime:
             continue
     
     return datetime.min
+
+def group_mentions_by_date(mentions: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    """Collapse multiple mentions on the same date into one row."""
+    grouped: Dict[str, Dict[str, Any]] = {}
+
+    for mention in mentions:
+        date = (mention.get("date") or "Unknown Date").strip() or "Unknown Date"
+        filename = (mention.get("filename") or "").strip()
+        snippet = (mention.get("snippet") or "").strip()
+
+        if date not in grouped:
+            grouped[date] = {
+                "date": date,
+                "filenames": [],
+                "snippets": [],
+            }
+
+        if filename and filename not in grouped[date]["filenames"]:
+            grouped[date]["filenames"].append(filename)
+        if snippet:
+            grouped[date]["snippets"].append(snippet)
+
+    grouped_rows = list(grouped.values())
+    grouped_rows.sort(key=lambda item: safe_parse_date(item["date"]))
+
+    rows: List[Dict[str, str]] = []
+    for item in grouped_rows:
+        rows.append({
+            "date": item["date"],
+            "filenames": "; ".join(item["filenames"]),
+            "snippet": " | ".join(item["snippets"]),
+        })
+
+    return rows
 
 def main():
     parser = argparse.ArgumentParser(description="Extract and categorize housing items from meetings using Claude.")
@@ -164,6 +334,9 @@ def main():
                 name = (item_data.get("name") or "").strip().lower()
                 if not name:
                     continue
+                
+                # Canonicalize variant names
+                name = canonicalize_name(name)
                 
                 category = normalize_category(item_data.get("category", "Other"))
                 note = (item_data.get("note") or "").strip()
@@ -277,13 +450,13 @@ def main():
         )
         writer.writeheader()
         for item in items_detail:
-            for mention in item["mentions"]:
+            for mention in group_mentions_by_date(item["mentions"]):
                 writer.writerow({
                     "canonical": item["canonical"],
                     "name": item["name"],
                     "category": item["category"],
                     "total_count": item["count"],
-                    "mention_filename": mention["filename"],
+                    "mention_filename": mention["filenames"],
                     "mention_date": mention["date"],
                     "mention_snippet": mention["snippet"],
                 })

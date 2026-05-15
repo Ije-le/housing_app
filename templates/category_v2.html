@@ -1,0 +1,62 @@
+{% extends "base_v2.html" %}
+
+{% block title %}{{ category }} - Housing Authority Accountability{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="/">← Back to Home</a>
+</div>
+
+<h2>{{ category }}</h2>
+<p style="margin-bottom: 1rem; color: #7f8c8d;">
+    {{ items | length }} unique issues • {{ total_mentions }} total mentions
+</p>
+
+<p style="margin-bottom: 2rem; background: #f9f9f9; padding: 1rem; border-radius: 4px;">
+    This category covers all building systems and infrastructure related to {{ category | lower }}.
+    The list below shows each issue and how many times it appeared in meeting records,
+    helping you see which problems were discussed most frequently.
+</p>
+
+<div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    {% for item in items %}
+    <div style="padding: 1.5rem; border-bottom: 1px solid #ecf0f1; transition: background 0.2s;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <div>
+                <h3 style="margin: 0; color: #2c3e50;">
+                    <a href="/item/{{ item.canonical }}" style="color: #3498db; text-decoration: none;">
+                        {{ item.name }}
+                    </a>
+                </h3>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #7f8c8d;">
+                    First mentioned: {{ item.first_mentioned_date }}
+                </p>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #e74c3c;">{{ item.count }}</div>
+                <div style="font-size: 0.85rem; color: #7f8c8d;">mentions</div>
+            </div>
+        </div>
+        {% if item.example_snippet %}
+        <p style="margin: 0.75rem 0 0 0; font-size: 0.9rem; color: #666; background: #f9f9f9; padding: 0.75rem; border-left: 3px solid #3498db;">
+            {{ item.example_snippet }}
+        </p>
+        {% endif %}
+        <p style="margin: 0.75rem 0 0 0;">
+            <a href="/item/{{ item.canonical }}" style="color: #3498db; text-decoration: none; font-size: 0.9rem;">
+                View timeline →
+            </a>
+        </p>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="summary-box" style="margin-top: 2rem;">
+    <p>
+        <strong>What does this mean?</strong>
+        Issues with higher mention counts were discussed more frequently in meetings.
+        This can indicate persistent problems, ongoing concerns, or active management discussion.
+        Click any issue to see the full timeline and exact context.
+    </p>
+</div>
+{% endblock %}

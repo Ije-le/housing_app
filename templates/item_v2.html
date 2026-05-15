@@ -1,0 +1,109 @@
+{% extends "base_v2.html" %}
+
+{% block title %}{{ item_name }} - Housing Authority Accountability{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="/">Home</a> / <a href="/category/{{ category | slugify }}">{{ category }}</a> / {{ item_name }}
+</div>
+
+<div class="category-badge">{{ category }}</div>
+
+<h2>{{ item_name }}</h2>
+
+<div class="summary-box">
+    <p>{{ summary }}</p>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <div class="stat">{{ mention_count }}</div>
+        <div class="stat-label">Meeting Mentions</div>
+    </div>
+    <div class="card">
+        <div class="stat">{{ total_count }}</div>
+        <div class="stat-label">Total References</div>
+    </div>
+    <div class="card">
+        <div style style="color: #7f8c8d; font-size: 0.9rem;">First mentioned</div>
+        <div class="stat" style="font-size: 1.2rem; color: #2c3e50;">{{ first_mentioned_date }}</div>
+    </div>
+</div>
+
+{% if mentions_by_year %}
+<div class="card" style="margin-bottom: 2rem;">
+    <h3>Mentions by Year</h3>
+    <div style="display: flex; gap: 1rem; align-items: flex-end; height: 100px;">
+        {% for year, count in mentions_by_year.items() %}
+        <div style="flex: 1; text-align: center;">
+            <div style="height: calc({{ count }} * 15px); background: #3498db; border-radius: 4px 4px 0 0; margin-bottom: 0.5rem;"></div>
+            <div style="font-size: 0.8rem; color: #7f8c8d;">{{ year }}<br><strong>{{ count }}</strong></div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<h3 style="margin-bottom: 1rem; color: #2c3e50;">Timeline of All Mentions</h3>
+<div class="timeline">
+    {% if mentions %}
+        {% for mention in mentions %}
+        <div class="timeline-item">
+            <div class="timeline-date">{{ mention.date }}</div>
+            <div style="font-size: 0.85rem; color: #7f8c8d; margin-bottom: 0.5rem;">{{ mention.filename }}</div>
+            {% if mention.snippet %}
+            <div class="timeline-snippet">
+                {{ mention.snippet }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+    <p style="color: #7f8c8d;">No mention details available.</p>
+    {% endif %}
+</div>
+
+<div class="related-issues" id="related-issues" style="display: none;">
+    <h3>Issues Often Mentioned Together</h3>
+    <p style="font-size: 0.9rem; color: #7f8c8d; margin-bottom: 1rem;">
+        These issues appeared in the same meetings, suggesting they may be related or symptomatic of broader building problems.
+    </p>
+    <div id="related-list"></div>
+</div>
+
+<div class="summary-box" style="margin-top: 2rem;">
+    <h3>Understanding the Timeline</h3>
+    <ul style="margin-left: 1.5rem;">
+        <li><strong>Multiple mentions:</strong> Issues that appear repeatedly suggest persistent problems or ongoing management attention</li>
+        <li><strong>Time gaps:</strong> Long periods between mentions might indicate resolution or dormant issues</li>
+        <li><strong>Snippets:</strong> Read the exact language used in meetings to understand context and responses</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const itemCanonical = "{{ item_canonical }}";
+    
+    // Fetch related issues
+    fetch(`/api/related-issues/${itemCanonical}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.length > 0) {
+                const relatedList = document.getElementById('related-list');
+                relatedList.innerHTML = data.map(item => 
+                    `<div class="related-issue">
+                        <strong>${item.name}</strong><br>
+                        <span style="color: #7f8c8d; font-size: 0.85rem;">
+                            Mentioned in ${item.co_mentions} of the same meetings
+                        </span>
+                    </div>`
+                ).join('');
+                document.getElementById('related-issues').style.display = 'block';
+            }
+        })
+        .catch(err => console.error('Error loading related issues:', err));
+});
+</script>
+{% endblock %}

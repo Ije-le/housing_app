@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ item.name }} | Housing Minutes Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <main class="shell detail-shell">
+    <a class="back-link" href="{{ url_for('index') }}">Back to dashboard</a>
+
+    <section class="card hero detail-hero">
+      <div>
+        <p class="eyebrow">Issue detail</p>
+        <h1>{{ item.name }}</h1>
+        <p class="lead">{{ item.summary }}</p>
+        <div class="meta-row">
+          <span class="pill">{{ item.family }}</span>
+          <span class="pill">{{ item.group }}</span>
+          <span class="pill">{{ item.count }} mentions</span>
+        </div>
+      </div>
+      <div class="detail-nav">
+        {% if previous_item %}<a href="{{ url_for('item_detail', slug=previous_item.slug) }}">Previous</a>{% endif %}
+        {% if next_item %}<a href="{{ url_for('item_detail', slug=next_item.slug) }}">Next</a>{% endif %}
+      </div>
+    </section>
+
+    <section class="grid grid-2">
+      <section class="card section-panel">
+        <div class="section-head">
+          <div>
+            <p class="panel-label">Timing</p>
+            <h2>How often it reappeared</h2>
+          </div>
+          <div class="section-note">Monthly and yearly mention counts for this item</div>
+        </div>
+        <div class="chart-stack">
+          <div class="chart-wrap chart-small"><canvas id="monthlyChart"></canvas></div>
+          <div class="chart-wrap chart-small"><canvas id="yearlyChart"></canvas></div>
+        </div>
+      </section>
+
+      <section class="card section-panel">
+        <div class="section-head">
+          <div>
+            <p class="panel-label">Meeting references</p>
+            <h2>Where it appears in the record</h2>
+          </div>
+          <div class="section-note">The original meeting pages are linked when available</div>
+        </div>
+        <div class="meeting-list">
+          {% for meeting in meeting_refs %}
+            <a class="meeting-card" href="{{ url_for('meeting_detail', slug=meeting.slug) }}">
+              <div>
+                <strong>{{ meeting.date }}</strong>
+                <span>{{ meeting.filename }}</span>
+              </div>
+              <p>{{ meeting.summary }}</p>
+            </a>
+          {% endfor %}
+          {% if not meeting_refs %}
+            <div class="empty-state">No meeting references were linked for this item.</div>
+          {% endif %}
+        </div>
+      </section>
+    </section>
+
+    <section class="grid grid-2">
+      <section class="card section-panel">
+        <div class="section-head">
+          <div>
+            <p class="panel-label">Related items</p>
+            <h2>Other issues that appeared in the same meetings</h2>
+          </div>
+          <div class="section-note">This surface shows documented co-occurrence only</div>
+        </div>
+        <div class="result-grid">
+          {% for related in related_items %}
+            <article class="result-card related-card">
+              <div class="result-card-head">
+                <div>
+                  <p class="item-family">{{ related.family }}</p>
+                  <h3><a href="{{ url_for('item_detail', slug=related.slug) }}">{{ related.name }}</a></h3>
+                </div>
+                <span class="pill">{{ related.related_count }} shared meetings</span>
+              </div>
+              <p>{{ related.summary }}</p>
+            </article>
+          {% endfor %}
+          {% if not related_items %}
+            <div class="empty-state">No related items were detected yet.</div>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="card section-panel">
+        <div class="section-head">
+          <div>
+            <p class="panel-label">Source notes</p>
+            <h2>What the minutes say</h2>
+          </div>
+          <div class="section-note">Brief excerpts from the extracted mentions</div>
+        </div>
+        <div class="mention-list">
+          {% for mention in item.mentions %}
+            <article class="mention-card">
+              <div class="mention-head">
+                <strong>{{ mention.date or 'Unknown date' }}</strong>
+                {% if mention.filename %}
+                  <a href="{{ url_for('pdf_file', filename=mention.filename) }}" target="_blank" rel="noreferrer noopener">{{ mention.filename }}</a>
+                {% endif %}
+              </div>
+              <p>{{ mention.notes or 'No note text available.' }}</p>
+            </article>
+          {% endfor %}
+          {% if not item.mentions %}
+            <div class="empty-state">No extracted notes were available for this issue.</div>
+          {% endif %}
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const monthlySeries = {{ monthly_series | tojson }};
+    const yearlySeries = {{ yearly_series | tojson }};
+
+    const monthlyChart = document.getElementById('monthlyChart');
+    if (monthlyChart) {
+      new Chart(monthlyChart, {
+        type: 'bar',
+        data: {
+          labels: monthlySeries.map(point => point.label),
+          datasets: [{
+            data: monthlySeries.map(point => point.value),
+            backgroundColor: 'rgba(15, 118, 110, 0.72)',
+            borderRadius: 10,
+          }],
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { beginAtZero: true, grid: { color: 'rgba(24, 32, 42, 0.08)' } },
+          },
+        },
+      });
+    }
+
+    const yearlyChart = document.getElementById('yearlyChart');
+    if (yearlyChart) {
+      new Chart(yearlyChart, {
+        type: 'line',
+        data: {
+          labels: yearlySeries.map(point => point.label),
+          datasets: [{
+            data: yearlySeries.map(point => point.value),
+            borderColor: '#b45309',
+            backgroundColor: 'rgba(180, 83, 9, 0.14)',
+            tension: 0.3,
+            fill: true,
+          }],
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { beginAtZero: true, grid: { color: 'rgba(24, 32, 42, 0.08)' } },
+          },
+        },
+      });
+    }
+  </script>
+</body>
+</html>

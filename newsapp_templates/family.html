@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ family_name }} | Housing Minutes Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <main class="shell detail-shell">
+    <a class="back-link" href="{{ url_for('index') }}">Back to dashboard</a>
+
+    <section class="card hero detail-hero">
+      <div>
+        <p class="eyebrow">Issue family</p>
+        <h1>{{ family_name }}</h1>
+        <p class="lead">This page clusters items that share the same underlying system or building concern. It is built for pattern-finding, not causal claims.</p>
+        <div class="meta-row">
+          <span class="pill">{{ family_items|length }} tracked items</span>
+          <span class="pill">{{ family_series|length }} active months</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-2">
+      <section class="card section-panel">
+        <div class="section-head">
+          <div>
+            <p class="panel-label">Timeline</p>
+            <h2>Monthly mentions across the family</h2>
+          </div>
+          <div class="section-note">Longer runs show recurring attention in the minutes</div>
+        </div>
+        <div class="chart-wrap chart-small"><canvas id="familyChart"></canvas></div>
+      </section>
+
+      <section class="card section-panel">
+        <div class="section-head">
+          <div>
+            <p class="panel-label">Related families</p>
+            <h2>Commonly seen alongside this one</h2>
+          </div>
+          <div class="section-note">Co-occurrence from the same meetings</div>
+        </div>
+        <div class="pair-list">
+          {% for related in related_families %}
+            <a class="pair-card link-card" href="{{ url_for('family_detail', slug=related.slug) }}">
+              <div class="pair-title">{{ related.family }}</div>
+              <div class="pair-meta">Appeared in {{ related.count }} shared meeting{{ 's' if related.count != 1 else '' }}</div>
+            </a>
+          {% endfor %}
+          {% if not related_families %}
+            <div class="empty-state">No related families were detected yet.</div>
+          {% endif %}
+        </div>
+      </section>
+    </section>
+
+    <section class="card section-panel">
+      <div class="section-head">
+        <div>
+          <p class="panel-label">Tracked items</p>
+          <h2>Everything in this family</h2>
+        </div>
+        <div class="section-note">Open an item to inspect its mentions and source notes</div>
+      </div>
+      <div class="result-grid">
+        {% for item in family_items %}
+          <article class="result-card">
+            <div class="result-card-head">
+              <div>
+                <p class="item-family">{{ item.group }}</p>
+                <h3><a href="{{ url_for('item_detail', slug=item.slug) }}">{{ item.name }}</a></h3>
+              </div>
+              <span class="pill">{{ item.count }} mentions</span>
+            </div>
+            <p>{{ item.summary }}</p>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const familySeries = {{ family_series | tojson }};
+    const familyChart = document.getElementById('familyChart');
+    if (familyChart) {
+      new Chart(familyChart, {
+        type: 'line',
+        data: {
+          labels: familySeries.map(point => point.label),
+          datasets: [{
+            data: familySeries.map(point => point.value),
+            borderColor: '#14532d',
+            backgroundColor: 'rgba(20, 83, 45, 0.14)',
+            tension: 0.35,
+            fill: true,
+            pointRadius: 2,
+          }],
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { beginAtZero: true, grid: { color: 'rgba(24, 32, 42, 0.08)' } },
+          },
+        },
+      });
+    }
+  </script>
+</body>
+</html>

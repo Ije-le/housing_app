@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ meeting.filename }} | Housing Minutes Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <main class="shell detail-shell">
+    <a class="back-link" href="{{ url_for('meetings_index') }}">Back to meetings</a>
+
+    <section class="card hero detail-hero">
+      <div>
+        <p class="eyebrow">Meeting detail</p>
+        <h1>{{ meeting.date }}</h1>
+        <p class="lead">{{ meeting.summary }}</p>
+        <div class="meta-row">
+          <span class="pill">{{ meeting.item_count }} extracted issue{{ 's' if meeting.item_count != 1 else '' }}</span>
+          <span class="pill">{{ meeting.resident_count }} resident comment{{ 's' if meeting.resident_count != 1 else '' }}</span>
+          <span class="pill">{{ meeting.decision_count }} decision{{ 's' if meeting.decision_count != 1 else '' }}</span>
+        </div>
+      </div>
+      <div class="detail-nav">
+        {% if meeting.filename %}
+          <a href="{{ url_for('pdf_file', filename=meeting.filename) }}" target="_blank" rel="noreferrer noopener">Open PDF</a>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="grid grid-2">
+      <section class="card section-panel">
+        <div class="section-head">
+          <div>
+            <p class="panel-label">Resident and staff text</p>
+            <h2>What was said in the record</h2>
+          </div>
+          <div class="section-note">Summarized from the extracted minutes</div>
+        </div>
+        <div class="text-stack">
+          <div class="text-block">
+            <h3>Residents' comments</h3>
+            {% for line in meeting.residents_comments %}
+              <p>{{ line }}</p>
+            {% endfor %}
+          </div>
+          <div class="text-block">
+            <h3>Executive director report</h3>
+            {% for line in meeting.executive_directors_report %}
+              <p>{{ line }}</p>
+            {% endfor %}
+          </div>
+          <div class="text-block">
+            <h3>Decisions</h3>
+            {% for line in meeting.decisions %}
+              {% if line is mapping %}
+                <p>{{ line.decision }}{% if line.vote %} (vote: {{ line.vote }}){% endif %}</p>
+              {% else %}
+                <p>{{ line }}</p>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <section class="card section-panel">
+        <div class="section-head">
+          <div>
+            <p class="panel-label">Issues mentioned</p>
+            <h2>Items extracted from this meeting</h2>
+          </div>
+          <div class="section-note">Use these links to jump into the item pages</div>
+        </div>
+        <div class="meeting-list">
+          {% for item in related_items %}
+            <a class="meeting-card" href="{{ url_for('item_detail', slug=item.slug) }}">
+              <div>
+                <strong>{{ item.name }}</strong>
+                <span>{{ item.count }} shared mention{{ 's' if item.count != 1 else '' }}</span>
+              </div>
+              <p>{{ item.name }} appears in the context of this meeting.</p>
+            </a>
+          {% endfor %}
+          {% if not related_items %}
+            <div class="empty-state">No extracted issue links were found for this meeting.</div>
+          {% endif %}
+        </div>
+      </section>
+    </section>
+
+    <section class="card section-panel">
+      <div class="section-head">
+        <div>
+          <p class="panel-label">Co-occurrence</p>
+          <h2>Issue families present in the same meeting</h2>
+        </div>
+        <div class="section-note">This visualizes documented overlap, not cause and effect</div>
+      </div>
+      <div class="chip-row wrap">
+        {% for family in family_summary %}
+          <span class="chip">{{ family.family }}: {{ family.count }}</span>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+</body>
+</html>

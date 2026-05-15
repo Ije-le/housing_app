@@ -5,6 +5,7 @@ Interactive exploration of building maintenance issues from 5 years of meeting m
 """
 
 from flask import Flask, render_template, request, jsonify
+from markupsafe import Markup
 from pathlib import Path
 import csv
 import json
@@ -17,6 +18,7 @@ app = Flask(__name__)
 GROUPED_ITEMS_PATH = Path("./extracted_json/grouped_items.csv")
 ITEMS_MENTIONS_PATH = Path("./extracted_json/items_with_mentions.csv")
 ALL_MEETINGS_PATH = Path("./extracted_json/all_meetings.json")
+MANUAL_BLURBS_PATH = Path("./manual_blurbs.json")
 
 # Load data
 def load_grouped_items():
@@ -27,13 +29,18 @@ def load_grouped_items():
         reader = csv.DictReader(f)
         for row in reader:
             category = row.get("category", "Other")
+            example_snippet = row.get("example_snippet", "").strip()
+            # Clean snippet delimiters
+            example_snippet = example_snippet.replace(" | ", ", ").replace("|", ",")
+            example_snippet = " ".join(example_snippet.split())
+            
             items_by_category[category].append({
                 "name": row.get("name", "").strip(),
                 "canonical": row.get("canonical", "").strip(),
                 "count": int(row.get("count", 0)),
                 "first_mentioned_filename": row.get("first_mentioned_filename", "").strip(),
                 "first_mentioned_date": row.get("first_mentioned_date", "").strip(),
-                "example_snippet": row.get("example_snippet", "").strip(),
+                "example_snippet": example_snippet,
             })
     
     # Sort items within each category by count (descending)
@@ -50,10 +57,15 @@ def load_item_mentions(canonical_name):
         reader = csv.DictReader(f)
         for row in reader:
             if row.get("canonical", "").strip().lower() == canonical_name.lower():
+                snippet = row.get("mention_snippet", "").strip()
+                # Clean snippet delimiters
+                snippet = snippet.replace(" | ", ", ").replace("|", ",")
+                snippet = " ".join(snippet.split())
+                
                 mentions.append({
                     "date": row.get("mention_date", "").strip(),
                     "filename": row.get("mention_filename", "").strip(),
-                    "snippet": row.get("mention_snippet", "").strip(),
+                    "snippet": snippet,
                 })
     
     # Sort by date (earliest first)
@@ -75,33 +87,239 @@ def parse_date_for_sort(date_str):
     
     return datetime.min
 
-def generate_item_summary(item_data, mentions):
-    """Generate a narrative summary for an item."""
-    if not mentions:
-        return f"{item_data['name']} was mentioned {item_data['count']} time(s) in the meeting records."
+def load_manual_blurbs():
+    """Load manually edited blurbs from JSON file."""
+    if MANUAL_BLURBS_PATH.exists():
+        try:
+            with open(MANUAL_BLURBS_PATH, encoding="utf-8") as f:
+                return json.load(f)
+        except:
+            return {}
+    return {}
+
+def save_manual_blurbs(blurbs):
+    """Save blurbs to JSON file for manual editing."""
+    with open(MANUAL_BLURBS_PATH, "w", encoding="utf-8") as f:
+        json.dump(blurbs, f, indent=2, ensure_ascii=False)
+
+def export_all_blurbs():
+    """Export all auto-generated blurbs to JSON file for manual editing."""
+    blurbs = {}
     
-    dates = [m["date"] for m in mentions if m["date"] and m["date"] != "Unknown Date"]
-    if len(dates) > 1:
-        date_range = f"from {dates[0]} to {dates[-1]}"
-    elif dates:
-        date_range = f"on {dates[0]}"
+    for category, items in GROUPED_ITEMS.items():
+        for item in items:
+            # Load mentions for this item
+            mentions = load_item_mentions(item["canonical"])
+            # Generate blurb
+            blurb = generate_item_summary(item, mentions)
+            # Store with canonical name as key
+            blurbs[item["canonical"]] = str(blurb)
+    
+    save_manual_blurbs(blurbs)
+    return blurbs
+
+def extract_kwic_mentions(item_name, mentions):
+    """Extract contextually relevant mentions using KWIC (Key Word In Context).
+    
+    Filters mentions to only include those with meaningful action/context:
+    - Scheduling/planning actions
+    - Completion/resolution
+    - Problems/failures
+    - Status updates
+    - Confirmation of work done
+    """
+    # Keywords indicating meaningful context
+    action_keywords = {
+        'scheduled', 'schedule', 'planned', 'plan', 'completed', 'complete', 
+        'finished', 'done', 'approved', 'approve', 'failed', 'failure', 'problem',
+        'issue', 'broken', 'not working', 'fixed', 'fix', 'repair', 'repaired',
+        'maintenance', 'maintain', 'inspection', 'inspect', 'checked', 'check',
+        'replacement', 'replace', 'need', 'needed', 'urgent', 'delay', 'delayed',
+        'postpone', 'postponed', 'confirmed', 'confirm', 'awaiting', 'await',
+        'pending', 'in progress', 'not yet', 'still', 'remains', 'remain'
+    }
+    
+    kwic_mentions = []
+    
+    for mention in mentions:
+        if not mention["snippet"]:
+            continue
+        
+        snippet_lower = mention["snippet"].lower()
+        item_lower = item_name.lower()
+        
+        # Check if snippet contains action keywords nearby the item name
+        contains_action = any(keyword in snippet_lower for keyword in action_keywords)
+        
+        if contains_action:
+            kwic_mentions.append(mention)
+    
+    return kwic_mentions
+
+def format_date_short(date_str):
+    """Format date as 'Month Year' (e.g., 'March 2022')."""
+    if not date_str or date_str == "Unknown Date":
+        return "an unknown date"
+    
+    formats = ["%B %d, %Y", "%b %d, %Y", "%m/%d/%Y", "%Y-%m-%d"]
+    for fmt in formats:
+        try:
+            dt = datetime.strptime(date_str, fmt)
+            return dt.strftime("%B %Y")
+        except ValueError:
+            continue
+    
+    return date_str
+
+def extract_action_context(snippet, mention_type):
+    """Extract specific action/context from snippet for narrative."""
+    snippet_lower = snippet.lower()
+    snippet_clean = snippet.strip()
+    
+    # Look for specific outcomes and include details
+    if 'scheduled' in snippet_lower or 'schedule' in snippet_lower:
+        return snippet_clean
+    elif 'completed' in snippet_lower or 'done' in snippet_lower:
+        return snippet_clean
+    elif 'confirmed' in snippet_lower or 'confirm' in snippet_lower:
+        return snippet_clean
+    elif 'fire' in snippet_lower or 'outbreak' in snippet_lower:
+        return snippet_clean
+    elif 'theft' in snippet_lower or 'stolen' in snippet_lower or 'missing' in snippet_lower:
+        return snippet_clean
+    elif 'not working' in snippet_lower or 'broken' in snippet_lower or 'failed' in snippet_lower:
+        return snippet_clean
+    elif 'problem' in snippet_lower or 'issue' in snippet_lower:
+        # Return the full snippet to include problem details
+        return snippet_clean
+    elif 'delay' in snippet_lower or 'postpone' in snippet_lower:
+        return snippet_clean
+    elif 'awaiting' in snippet_lower or 'pending' in snippet_lower:
+        return snippet_clean
     else:
-        date_range = "in the meeting records"
+        # Return full snippet without truncation
+        return snippet_clean
+
+def categorize_mention_type(snippet, item_name):
+    """Categorize the type of mention for narrative building."""
+    snippet_lower = snippet.lower()
+    item_lower = item_name.lower()
     
-    # Get sample snippets
-    snippets = [m["snippet"] for m in mentions if m["snippet"]][:3]
+    if any(word in snippet_lower for word in ['scheduled', 'schedule', 'planned', 'plan']):
+        return 'scheduled'
+    elif any(word in snippet_lower for word in ['completed', 'complete', 'finished', 'done', 'confirmed', 'confirm']):
+        return 'completed'
+    elif any(word in snippet_lower for word in ['failed', 'failure', 'problem', 'not working', 'broken']):
+        return 'problem'
+    elif any(word in snippet_lower for word in ['awaiting', 'await', 'pending', 'not yet', 'delay', 'delayed']):
+        return 'pending'
+    else:
+        return 'mention'
+
+def generate_item_summary(item_data, mentions):
+    """Generate an engaging KWIC-based narrative summary for an item."""
+    if not mentions:
+        return Markup(f"{item_data['name']} was mentioned {item_data['count']} time(s) in the meeting records.")
     
-    summary = f"{item_data['name'].title()} appears in meeting records {date_range}. "
-    summary += f"Mentioned {item_data['count']} times. "
+    # Extract contextually relevant mentions
+    kwic_mentions = extract_kwic_mentions(item_data['name'], mentions)
     
-    if snippets:
-        summary += "Examples: " + "; ".join(snippets)
+    if not kwic_mentions:
+        # Fallback: use all mentions if no action keywords found
+        kwic_mentions = mentions
     
-    return summary
+    # Sort chronologically
+    kwic_mentions_sorted = sorted(kwic_mentions, key=lambda x: parse_date_for_sort(x["date"]))
+    
+    # Build narrative with key events
+    narrative_parts = []
+    
+    if kwic_mentions_sorted:
+        first = kwic_mentions_sorted[0]
+        first_type = categorize_mention_type(first["snippet"], item_data['name'])
+        first_date = format_date_short(first['date'])
+        
+        # Opening: First mention with context
+        action = extract_action_context(first["snippet"], first_type)
+        narrative_parts.append(f"The board first talked about {item_data['name'].lower()} in {first_date}.")
+        
+        # Middle events: Key state transitions - pick most significant ones
+        if len(kwic_mentions_sorted) > 1:
+            middle_mentions = kwic_mentions_sorted[1:-1]
+            
+            for mention in middle_mentions[:3]:  # Limit to 3 middle events for brevity
+                mention_type = categorize_mention_type(mention["snippet"], item_data['name'])
+                mention_date = format_date_short(mention['date'])
+                action = extract_action_context(mention["snippet"], mention_type)
+                
+                # Build engaging sentence based on context
+                if mention_type == 'scheduled':
+                    narrative_parts.append(f"In {mention_date}, it {action}.")
+                elif mention_type == 'completed':
+                    narrative_parts.append(f"In {mention_date}, it {action}.")
+                elif mention_type == 'problem' or 'fire' in mention["snippet"].lower() or 'theft' in mention["snippet"].lower():
+                    # Highlight issues
+                    narrative_parts.append(f"But in {mention_date}, {action}.")
+                elif mention_type == 'pending':
+                    narrative_parts.append(f"However, in {mention_date}, {action}.")
+                else:
+                    narrative_parts.append(f"In {mention_date}, {action}.")
+            
+            # Only add no-confirmation note if there's a specific gap after a scheduled action
+            # and the next action doesn't indicate completion
+            if len(kwic_mentions_sorted) >= 3:
+                scheduled_indices = [i for i, m in enumerate(kwic_mentions_sorted) 
+                                    if categorize_mention_type(m["snippet"], item_data['name']) == 'scheduled']
+                
+                for sched_idx in scheduled_indices:
+                    if sched_idx < len(kwic_mentions_sorted) - 1:
+                        next_mention = kwic_mentions_sorted[sched_idx + 1]
+                        next_type = categorize_mention_type(next_mention["snippet"], item_data['name'])
+                        
+                        # Only add note if scheduled action is followed by >6 months gap and NOT completed/confirmed
+                        date1 = parse_date_for_sort(kwic_mentions_sorted[sched_idx]["date"])
+                        date2 = parse_date_for_sort(next_mention["date"])
+                        
+                        if date1 != datetime.min and date2 != datetime.min:
+                            gap_days = (date2 - date1).days
+                            # Only add confirmation note for significant gaps (>6 months) after scheduling
+                            if gap_days > 180 and next_type != 'completed':
+                                # Only add once, and only if not already in narrative
+                                if "There is no confirmation" not in " ".join(narrative_parts):
+                                    narrative_parts.append("There is no confirmation that the previous action took place or not.")
+        
+        # Closing: Last mention (if different from first)
+        if len(kwic_mentions_sorted) > 1:
+            last = kwic_mentions_sorted[-1]
+            last_type = categorize_mention_type(last["snippet"], item_data['name'])
+            last_date = format_date_short(last['date'])
+            last_action = extract_action_context(last["snippet"], last_type)
+            
+            if last_type == 'completed':
+                narrative_parts.append(f"Most recently in {last_date}, {last_action}.")
+            elif last_type == 'pending':
+                narrative_parts.append(f"As of {last_date}, status {last_action}.")
+            else:
+                narrative_parts.append(f"Most recently in {last_date}, {last_action}.")
+    
+    summary = " ".join(narrative_parts)
+    summary += f" <a href='#' onclick='toggleTimeline(event)' class='view-timeline-link'>View full timeline →</a>"
+    
+    return Markup(summary)
+
 
 # Load data at startup
 GROUPED_ITEMS = load_grouped_items()
 CATEGORIES = sorted(GROUPED_ITEMS.keys())
+
+# Export blurbs on first run if manual_blurbs.json doesn't exist
+if not MANUAL_BLURBS_PATH.exists():
+    print(f"Generating manual_blurbs.json for the first time...")
+    try:
+        export_all_blurbs()
+        print(f"✓ Created {MANUAL_BLURBS_PATH}")
+    except Exception as e:
+        print(f"✗ Error exporting blurbs: {e}")
 
 @app.route("/")
 def index():
@@ -117,6 +335,9 @@ def index():
             "item_count": len(items),
             "mention_count": total_mentions,
         })
+    
+    # Sort by mention count (highest first), then by name for consistent ordering
+    category_stats.sort(key=lambda x: (-x["mention_count"], x["name"]))
     
     return render_template(
         "index_v2.html",
@@ -171,18 +392,16 @@ def item_detail(item_canonical):
     # Load all mentions for this item
     mentions = load_item_mentions(item_canonical)
     
-    # Generate summary
-    summary = generate_item_summary(item_data, mentions)
+    # Load manual blurb if it exists, otherwise generate one
+    manual_blurbs = load_manual_blurbs()
+    if item_canonical in manual_blurbs:
+        summary = Markup(manual_blurbs[item_canonical])
+    else:
+        summary = generate_item_summary(item_data, mentions)
     
-    # Calculate frequency stats
-    mentions_by_year = defaultdict(int)
-    for mention in mentions:
-        date_str = mention["date"]
-        try:
-            year = datetime.strptime(date_str, "%B %d, %Y").year
-            mentions_by_year[year] += 1
-        except:
-            pass
+    # Calculate total mentions in system for proportion
+    total_system_mentions = sum(sum(item["count"] for item in items) for items in GROUPED_ITEMS.values())
+    item_proportion = (len(mentions) / total_system_mentions * 100) if total_system_mentions > 0 else 0
     
     return render_template(
         "item_v2.html",
@@ -195,7 +414,8 @@ def item_detail(item_canonical):
         total_count=item_data["count"],
         first_mentioned_date=item_data["first_mentioned_date"],
         example_snippet=item_data["example_snippet"],
-        mentions_by_year=dict(sorted(mentions_by_year.items())),
+        total_system_mentions=total_system_mentions,
+        item_proportion=item_proportion,
     )
 
 @app.route("/api/related-issues/<item_canonical>")
@@ -289,6 +509,19 @@ def api_related_issues(item_canonical):
         }
         for _, data in sorted_related
     ])
+
+@app.route("/admin/export-blurbs")
+def admin_export_blurbs():
+    """Export all auto-generated blurbs to JSON file for manual editing."""
+    try:
+        blurbs = export_all_blurbs()
+        return jsonify({
+            "status": "success",
+            "message": f"Exported {len(blurbs)} blurbs to {MANUAL_BLURBS_PATH}",
+            "file": str(MANUAL_BLURBS_PATH)
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.template_filter("slugify")
 def slugify(text):

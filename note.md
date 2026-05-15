@@ -44,4 +44,25 @@ I noticed a similar problem with other keywords: food banks retruns information 
 I named the pdf like this: Jan 21 (for January 2021) but this does not help users as far as dates are concerned. One may confuse Jan 21 and January 21st rather than January 2021. I intend to make the dates more clear to improve user experience.
 
 Also, the UI can look better, but this is not the most pressing issue.
-                                                               
+
+
+
+## Rough draft for intro:
+Attick Towers residents have bring a wide range of complaints about household items at the apartment to commissioners during [Housing Authority meetings]. Check to see what items have been broken the most in the last five years and if there have been [repercussion].
+
+
+
+# Lessons
+Definitely be more conscious of the data you use.
+
+# Walk around
+I did not like the blurbs because they sounded like the dcoument themselves, which is not odd. The texts made no sense like this:
+The board first talked about fire extinguisher in March 2022. In March 2023, it Fire extinguisher inspection scheduled for April 5, 2023. There is no confirmation that the previous action took place or not. Most recently in April 2024, fire extinguisher inspection mentioned
+
+I tried to fix this, couldn't, so I had to export the already generated blurbs and manually edite them, then told the app to adopt my blurbs.
+Was hard to connect issues much as I tried.
+
+# Up Next:
+Find name for app.
+Write intro: Why are we doing this? What do users stand to gain?
+Look at about page. remove or not.

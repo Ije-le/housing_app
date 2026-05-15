@@ -15,37 +15,8 @@
     <p>{{ summary }}</p>
 </div>
 
-<div class="grid">
-    <div class="card">
-        <div class="stat">{{ mention_count }}</div>
-        <div class="stat-label">Meeting Mentions</div>
-    </div>
-    <div class="card">
-        <div class="stat">{{ total_count }}</div>
-        <div class="stat-label">Total References</div>
-    </div>
-    <div class="card">
-        <div style style="color: #7f8c8d; font-size: 0.9rem;">First mentioned</div>
-        <div class="stat" style="font-size: 1.2rem; color: #2c3e50;">{{ first_mentioned_date }}</div>
-    </div>
-</div>
-
-{% if mentions_by_year %}
-<div class="card" style="margin-bottom: 2rem;">
-    <h3>Mentions by Year</h3>
-    <div style="display: flex; gap: 1rem; align-items: flex-end; height: 100px;">
-        {% for year, count in mentions_by_year.items() %}
-        <div style="flex: 1; text-align: center;">
-            <div style="height: calc({{ count }} * 15px); background: #3498db; border-radius: 4px 4px 0 0; margin-bottom: 0.5rem;"></div>
-            <div style="font-size: 0.8rem; color: #7f8c8d;">{{ year }}<br><strong>{{ count }}</strong></div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
-{% endif %}
-
-<h3 style="margin-bottom: 1rem; color: #2c3e50;">Timeline of All Mentions</h3>
-<div class="timeline">
+<h3 id="timeline" style="margin-bottom: 1rem; color: #2c3e50; display: none;">Timeline of All Mentions</h3>
+<div class="timeline" id="timeline-container" style="display: none; margin-bottom: 2rem;">
     {% if mentions %}
         {% for mention in mentions %}
         <div class="timeline-item">
@@ -63,6 +34,19 @@
     {% endif %}
 </div>
 
+<div class="card" style="margin-bottom: 2rem;">
+    <h3>Proportion of Total Mentions</h3>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="flex: 2;">
+            <div style="background: #ecf0f1; border-radius: 4px; height: 30px; overflow: hidden;">
+                <div style="background: #3498db; height: 100%; width: {{ item_proportion }}%; transition: width 0.3s;"></div>
+            </div>
+        </div>
+        <div style="flex: 1; font-size: 1.1rem; font-weight: bold; color: #2c3e50;">{{ mention_count }} of {{ total_system_mentions }}</div>
+    </div>
+    <p style="font-size: 0.85rem; color: #7f8c8d; margin-top: 0.5rem;">This issue represents {{ mention_count }} out of {{ total_system_mentions }} total mentions in the database</p>
+</div>
+
 <div class="related-issues" id="related-issues" style="display: none;">
     <h3 style="margin-bottom: 1rem; color: #2c3e50;">Potentially Related Issues</h3>
     <p style="font-size: 0.9rem; color: #7f8c8d; margin-bottom: 1.5rem;">
@@ -72,7 +56,7 @@
     <div id="related-list" style="display: flex; flex-direction: column; gap: 1rem;"></div>
 </div>
 
-<div class="summary-box" style="margin-top: 2rem;">
+<div class="summary-box" style="margin-top: 2rem; display: none;" id="understanding-section">
     <h3>Understanding the Timeline</h3>
     <ul style="margin-left: 1.5rem;">
         <li><strong>Multiple mentions:</strong> Issues that appear repeatedly suggest persistent problems or ongoing management attention</li>
@@ -85,6 +69,27 @@
 
 {% block extra_js %}
 <script>
+function toggleTimeline(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    const timelineContainer = document.getElementById('timeline-container');
+    const timelineHeader = document.getElementById('timeline');
+    const understandingSection = document.getElementById('understanding-section');
+    
+    const isHidden = timelineContainer.style.display === 'none';
+    
+    if (isHidden) {
+        timelineContainer.style.display = 'block';
+        timelineHeader.style.display = 'block';
+        understandingSection.style.display = 'block';
+    } else {
+        timelineContainer.style.display = 'none';
+        timelineHeader.style.display = 'none';
+        understandingSection.style.display = 'none';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const itemCanonical = "{{ item_canonical }}";
     

@@ -19,16 +19,14 @@
         <div class="stat-label">Unique Issues Identified</div>
         <p>From leaky faucets to elevator failures, every infrastructure problem mentioned in meetings.</p>
     </div>
-    <div class="card">
-        <div class="stat">{{ total_mentions }}</div>
-        <div class="stat-label">Total Mentions</div>
-        <p>The sum of all times these issues were discussed across meeting records.</p>
-    </div>
-    <div class="card">
-        <div class="stat">9</div>
-        <div class="stat-label">Categories</div>
-        <p>Issues organized by type: Plumbing, HVAC, Electrical, Appliances, and more.</p>
-    </div>
+</div>
+
+<div class="summary-box" style="margin-top: 1rem; padding: 0.75rem; background: #f5f5f5;">
+    <h5 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">How to Use</h5>
+    <ul style="margin: 0 0 0 1.25rem; padding: 0; font-size: 0.85rem; line-height: 1.4;">
+        <li>Browse categories and click an issue to read its narrative summary</li>
+        <li>Click "View full timeline" to see all mentions with meeting context</li>
+    </ul>
 </div>
 
 <h2>Browse by Issue Category</h2>
@@ -36,21 +34,10 @@
     {% for stat in category_stats %}
     <div class="card">
         <h3><a href="/category/{{ stat.name | slugify }}">{{ stat.name }}</a></h3>
-        <div class="stat">{{ stat.item_count }}</div>
-        <div class="stat-label">Issues in this category</div>
-        <p>{{ stat.mention_count }} total mentions across all meetings</p>
+        <div class="stat">{{ stat.mention_count }}</div>
+        <div class="stat-label">Total Mentions</div>
         <p style="margin-top: 1rem;"><a href="/category/{{ stat.name | slugify }}">View all →</a></p>
     </div>
     {% endfor %}
-</div>
-
-<div class="summary-box" style="margin-top: 2rem;">
-    <h3>How to Use This Tool</h3>
-    <ul style="margin-left: 1.5rem;">
-        <li><strong>Browse Categories:</strong> Click any category above to see all issues within it</li>
-        <li><strong>View Timelines:</strong> Click an issue to see when it was mentioned and what was said</li>
-        <li><strong>Spot Patterns:</strong> Notice when issues appeared together or in sequence</li>
-        <li><strong>Track Responses:</strong> Read what management and council said about repairs and delays</li>
-    </ul>
 </div>
 {% endblock %}

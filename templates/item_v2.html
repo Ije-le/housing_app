@@ -64,11 +64,12 @@
 </div>
 
 <div class="related-issues" id="related-issues" style="display: none;">
-    <h3>Issues Often Mentioned Together</h3>
-    <p style="font-size: 0.9rem; color: #7f8c8d; margin-bottom: 1rem;">
-        These issues appeared in the same meetings, suggesting they may be related or symptomatic of broader building problems.
+    <h3 style="margin-bottom: 1rem; color: #2c3e50;">Potentially Related Issues</h3>
+    <p style="font-size: 0.9rem; color: #7f8c8d; margin-bottom: 1.5rem;">
+        These issues show temporal or co-occurrence patterns that might indicate a causal relationship.
+        For example: a leak reported in January might lead to mold reported several months later.
     </p>
-    <div id="related-list"></div>
+    <div id="related-list" style="display: flex; flex-direction: column; gap: 1rem;"></div>
 </div>
 
 <div class="summary-box" style="margin-top: 2rem;">
@@ -77,6 +78,7 @@
         <li><strong>Multiple mentions:</strong> Issues that appear repeatedly suggest persistent problems or ongoing management attention</li>
         <li><strong>Time gaps:</strong> Long periods between mentions might indicate resolution or dormant issues</li>
         <li><strong>Snippets:</strong> Read the exact language used in meetings to understand context and responses</li>
+        <li><strong>Related issues:</strong> Items that appear together in meetings or within a year of each other may be connected</li>
     </ul>
 </div>
 {% endblock %}
@@ -86,20 +88,29 @@
 document.addEventListener('DOMContentLoaded', function() {
     const itemCanonical = "{{ item_canonical }}";
     
-    // Fetch related issues
+    // Fetch related issues with temporal analysis
     fetch(`/api/related-issues/${itemCanonical}`)
         .then(r => r.json())
         .then(data => {
             if (data.length > 0) {
                 const relatedList = document.getElementById('related-list');
-                relatedList.innerHTML = data.map(item => 
-                    `<div class="related-issue">
-                        <strong>${item.name}</strong><br>
-                        <span style="color: #7f8c8d; font-size: 0.85rem;">
-                            Mentioned in ${item.co_mentions} of the same meetings
-                        </span>
-                    </div>`
-                ).join('');
+                relatedList.innerHTML = data.map(item => {
+                    let relationshipDesc = '';
+                    if (item.co_mentions > 0) {
+                        relationshipDesc = `<strong>Co-occurs:</strong> Mentioned together in ${item.co_mentions} meeting(s)<br>`;
+                    }
+                    if (item.pattern) {
+                        relationshipDesc += `<strong>Temporal:</strong> ${item.pattern}`;
+                    }
+                    
+                    return `
+                        <div style="background: #f9f9f9; padding: 1rem; border-radius: 4px; border-left: 3px solid #3498db;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 0.5rem;">${item.name}</div>
+                            <div style="color: #7f8c8d; font-size: 0.85rem;">${relationshipDesc}</div>
+                            <div style="color: #666; font-size: 0.85rem; margin-top: 0.5rem;">First mentioned: ${item.first_mention_date}</div>
+                        </div>
+                    `;
+                }).join('');
                 document.getElementById('related-issues').style.display = 'block';
             }
         })

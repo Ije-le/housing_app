@@ -128,10 +128,13 @@ def index():
 @app.route("/category/<category_name>")
 def category_detail(category_name):
     """Category page: show all items in this category with mention counts."""
-    # Find matching category (case-insensitive)
+    # Convert slug back to original category name
+    # category_name comes as slug (e.g. "accessibility-and-safety-features")
+    # Need to match against actual category names
     matching_category = None
     for cat in CATEGORIES:
-        if cat.lower() == category_name.lower():
+        # Slugify both sides for comparison
+        if slugify(cat) == category_name.lower():
             matching_category = cat
             break
     
@@ -197,39 +200,94 @@ def item_detail(item_canonical):
 
 @app.route("/api/related-issues/<item_canonical>")
 def api_related_issues(item_canonical):
-    """API endpoint: find issues mentioned around the same time (potential patterns)."""
-    # Load all meetings
+    """API endpoint: find related issues with temporal analysis.
+    
+    Returns items that:
+    1. Appear in same meetings (co_mentions count)
+    2. Have temporal relationships (one typically appears after the other)
+    """
+    # Load all meetings and item mentions
     with open(ALL_MEETINGS_PATH, encoding="utf-8") as f:
         meetings = json.load(f)
     
-    # Find meetings where this item was mentioned
-    related_items = defaultdict(int)
+    # Get mentions for the current item
+    current_item_mentions = load_item_mentions(item_canonical)
+    if not current_item_mentions:
+        return jsonify([])
     
-    for meeting in meetings:
-        meeting_text = " ".join(
-            meeting.get("residents_comments", []) +
-            meeting.get("executive_directors_report", []) +
-            meeting.get("decisions", [])
-        ).lower()
-        
-        if item_canonical.lower() in meeting_text:
-            # This meeting mentions our item
-            # Now find other items mentioned in same meeting
-            for cat, items in GROUPED_ITEMS.items():
-                for item in items:
-                    if item["canonical"].lower() != item_canonical.lower():
-                        if item["canonical"].lower() in meeting_text:
-                            related_items[item["name"]] += 1
+    current_first_date = parse_date_for_sort(current_item_mentions[0]["date"])
+    current_last_date = parse_date_for_sort(current_item_mentions[-1]["date"])
     
-    # Return top related items
-    top_related = sorted(
-        related_items.items(),
-        key=lambda x: -x[1]
-    )[:5]
+    # Track relationships for all other items
+    related_analysis = {}
+    
+    for cat, items in GROUPED_ITEMS.items():
+        for item in items:
+            if item["canonical"].lower() == item_canonical.lower():
+                continue
+            
+            # Load all mentions for this candidate item
+            other_mentions = load_item_mentions(item["canonical"])
+            if not other_mentions:
+                continue
+            
+            other_first_date = parse_date_for_sort(other_mentions[0]["date"])
+            other_last_date = parse_date_for_sort(other_mentions[-1]["date"])
+            
+            # Count same-meeting occurrences
+            co_mention_count = 0
+            for meeting in meetings:
+                meeting_text = " ".join(
+                    meeting.get("residents_comments", []) +
+                    meeting.get("executive_directors_report", []) +
+                    meeting.get("decisions", [])
+                ).lower()
+                
+                if (item_canonical.lower() in meeting_text and 
+                    item["canonical"].lower() in meeting_text):
+                    co_mention_count += 1
+            
+            # Calculate temporal gap
+            if current_first_date != datetime.min and other_first_date != datetime.min:
+                time_gap = abs((other_first_date - current_first_date).days)
+                months_apart = round(time_gap / 30, 1)
+                
+                # Determine pattern type
+                if other_first_date > current_first_date:
+                    pattern = f"typically appears {months_apart} months later"
+                    time_offset = months_apart
+                elif other_first_date < current_first_date:
+                    pattern = f"typically appears {months_apart} months before"
+                    time_offset = -months_apart
+                else:
+                    pattern = "appears around the same time"
+                    time_offset = 0
+                
+                # Only include if there's a meaningful connection
+                if co_mention_count > 0 or time_gap < 365:  # Same meetings or within 1 year
+                    related_analysis[item["canonical"]] = {
+                        "name": item["name"],
+                        "co_mentions": co_mention_count,
+                        "months_apart": time_offset,
+                        "pattern": pattern,
+                        "first_mention_date": other_mentions[0]["date"],
+                    }
+    
+    # Sort by: (1) co-mentions count, (2) time gap proximity
+    sorted_related = sorted(
+        related_analysis.items(),
+        key=lambda x: (-x[1]["co_mentions"], abs(x[1]["months_apart"]))
+    )[:8]  # Return top 8 related items
     
     return jsonify([
-        {"name": name, "co_mentions": count}
-        for name, count in top_related
+        {
+            "name": data["name"],
+            "co_mentions": data["co_mentions"],
+            "months_apart": data["months_apart"],
+            "pattern": data["pattern"],
+            "first_mention_date": data["first_mention_date"],
+        }
+        for _, data in sorted_related
     ])
 
 @app.template_filter("slugify")

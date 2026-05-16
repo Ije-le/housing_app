@@ -1,6 +1,6 @@
 # NOTES
 
-I decided to try a dashboard (app_v2.py) instead of a search app, but the problem here was the difficulty for users to know what items fall under what category. To fix this, I created a full items list, so that users could simply browse through the list if they were looking for particular items.
+I decided to try a dashboard (app_v2.py) instead of a search app, but the problem here was the difficulty with knowing what items fall under what category. To fix this, I created a full items list, so that users could simply browse through the list if they were looking for particular items.
 For the details page, I had copilot summarize key occurrences in an item's timeline, and display that as a short note. Users interested in learning more can click on the actual timeline to see more details.
 
 One stumbling block with this process is that the minutes themsleves were not written in very conversational language or in too many words, so the summaries sounded like them. In was trying to merge multiple excerpts together, I was getting summaries that looked like this:

@@ -12,7 +12,6 @@ Multiple attempts to make the summaries sound and flow better did not help much,
 I caught a few other errors while manually cleaning up the summaries and while factchecking the output with the pdfs themselves Example:
 The app had an item labelled "entrance door" and the summary for that read: "In July 2021, residents liked the new Board meeting entrance door at Attick Towers."
 When I checked the pdf, residents did not say they liked the door. Rather, they liked a notice placed on the door. Excerpt from the minutes: Ms. Lynn reported that residents of Attick Towers liked the new Board meeting notice posted on the entrance door.
-There were a few more errors like that. I corrected or took them out where necessary.
 
 One other thing I did was to prompt Copilot to refer to related issues and not just the keywords mentioned. I saw the effect of this under some items. Fire system is an example. The summary went from just highlighting the times fire systems were mentioned to this:
 

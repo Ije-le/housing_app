@@ -12,6 +12,7 @@ import json
 import re
 from datetime import datetime
 from collections import defaultdict
+from flask import send_from_directory, url_for, abort
 
 app = Flask(__name__)
 
@@ -20,6 +21,7 @@ GROUPED_ITEMS_PATH = Path("./extracted_json/grouped_items.csv")
 ITEMS_MENTIONS_PATH = Path("./extracted_json/items_with_mentions.csv")
 ALL_MEETINGS_PATH = Path("./extracted_json/all_meetings.json")
 MANUAL_BLURBS_PATH = Path("./manual_blurbs.json")
+PDFS_DIR = Path("./pdfs")
 
 # Load data
 def load_grouped_items():
@@ -375,6 +377,43 @@ def category_detail(category_name):
         items=items,
         total_mentions=total_mentions,
     )
+
+
+@app.route("/category-breakdown")
+def category_breakdown():
+    """Category break down: list all items grouped by category with links to details."""
+    # Build a flattened list of all items and sort alphabetically by display name
+    full_items = []
+    for items in GROUPED_ITEMS.values():
+        for it in items:
+            full_items.append(it)
+
+    full_items_sorted = sorted(full_items, key=lambda x: x["name"].lower())
+
+    return render_template(
+        "category_breakdown.html",
+        full_items=full_items_sorted,
+    )
+
+
+@app.route('/pdfs/<path:filename>')
+def pdf_file(filename):
+    """Serve PDF files from the local `pdfs/` directory so timeline links open the source document."""
+    # Protect against directory traversal by using send_from_directory
+    # First try direct path under PDFS_DIR
+    candidate = PDFS_DIR / filename
+    if candidate.exists():
+        return send_from_directory(str(PDFS_DIR), filename)
+
+    # If not found, search recursively for a matching filename in subdirectories
+    # This allows CSVs to reference filenames without including subfolder names.
+    for p in PDFS_DIR.rglob('*'):
+        if p.is_file() and p.name == Path(filename).name:
+            rel_path = p.relative_to(PDFS_DIR)
+            return send_from_directory(str(PDFS_DIR), str(rel_path))
+
+    # Not found
+    abort(404)
 
 @app.route("/item/<item_canonical>")
 def item_detail(item_canonical):

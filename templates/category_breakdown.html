@@ -1,0 +1,15 @@
+{% extends "base_v2.html" %}
+
+{% block title %}Full item list - Facility Inspector{% endblock %}
+
+{% block content %}
+<h2>Full item list</h2>
+<p>Browse every item. Click an item to view its detail page.</p>
+
+<ul>
+  {% for item in full_items %}
+    <li><a href="/item/{{ item.canonical }}">{{ item.name }}</a></li>
+  {% endfor %}
+</ul>
+
+{% endblock %}

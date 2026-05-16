@@ -21,7 +21,7 @@
         {% for mention in mentions %}
         <div class="timeline-item">
             <div class="timeline-date">{{ mention.date }}</div>
-            <div style="font-size: 0.85rem; color: #7f8c8d; margin-bottom: 0.5rem;">{{ mention.filename }}</div>
+            <div style="font-size: 0.85rem; color: #7f8c8d; margin-bottom: 0.5rem;"><a href="{{ url_for('pdf_file', filename=mention.filename) }}" target="_blank">{{ mention.filename }}</a></div>
             {% if mention.snippet %}
             <div class="timeline-snippet">
                 {{ mention.snippet }}

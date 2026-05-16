@@ -1,6 +1,6 @@
 {% extends "base_v2.html" %}
 
-{% block title %}{{ item_name }} - Housing Authority Accountability{% endblock %}
+{% block title %}{{ item_name }} - Facility Inspector{% endblock %}
 
 {% block content %}
 <div class="breadcrumb">
@@ -44,7 +44,7 @@
         </div>
         <div style="flex: 1; font-size: 1.1rem; font-weight: bold; color: #2c3e50;">{{ mention_count }} of {{ total_system_mentions }}</div>
     </div>
-    <p style="font-size: 0.85rem; color: #7f8c8d; margin-top: 0.5rem;">This issue represents {{ mention_count }} out of {{ total_system_mentions }} total mentions in the database</p>
+    <p style="font-size: 0.85rem; color: #7f8c8d; margin-top: 0.5rem;">This item represents {{ mention_count }} out of {{ total_system_mentions }} total mentions in the database</p>
 </div>
 
 <div class="related-issues" id="related-issues" style="display: none;">

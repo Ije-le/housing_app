@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Housing Authority Accountability App v2
+Facility Inspector App v2
 Interactive exploration of building maintenance issues from 5 years of meeting minutes.
 """
 
@@ -9,6 +9,7 @@ from markupsafe import Markup
 from pathlib import Path
 import csv
 import json
+import re
 from datetime import datetime
 from collections import defaultdict
 
@@ -136,7 +137,11 @@ def extract_kwic_mentions(item_name, mentions):
         'maintenance', 'maintain', 'inspection', 'inspect', 'checked', 'check',
         'replacement', 'replace', 'need', 'needed', 'urgent', 'delay', 'delayed',
         'postpone', 'postponed', 'confirmed', 'confirm', 'awaiting', 'await',
-        'pending', 'in progress', 'not yet', 'still', 'remains', 'remain'
+        'pending', 'in progress', 'not yet', 'still', 'remains', 'remain',
+        'payment', 'payments', 'paid', 'bill', 'invoice', 'grant', 'funding',
+        'reinstall', 'installed', 'installation', 'alarm', 'fire', 'smoke',
+        'inspection', 'passed', 'pass', 'requested', 'request', 'announce',
+        'announcement', 'department', 'emergency'
     }
     
     kwic_mentions = []
@@ -177,13 +182,14 @@ def extract_action_context(snippet, mention_type):
     snippet_clean = snippet.strip()
     
     # Look for specific outcomes and include details
-    if 'scheduled' in snippet_lower or 'schedule' in snippet_lower:
+    if mention_type == 'incident':
+        # For incidents, show the full context to capture what happened
+        return snippet_clean
+    elif 'scheduled' in snippet_lower or 'schedule' in snippet_lower:
         return snippet_clean
     elif 'completed' in snippet_lower or 'done' in snippet_lower:
         return snippet_clean
     elif 'confirmed' in snippet_lower or 'confirm' in snippet_lower:
-        return snippet_clean
-    elif 'fire' in snippet_lower or 'outbreak' in snippet_lower:
         return snippet_clean
     elif 'theft' in snippet_lower or 'stolen' in snippet_lower or 'missing' in snippet_lower:
         return snippet_clean
@@ -205,7 +211,10 @@ def categorize_mention_type(snippet, item_name):
     snippet_lower = snippet.lower()
     item_lower = item_name.lower()
     
-    if any(word in snippet_lower for word in ['scheduled', 'schedule', 'planned', 'plan']):
+    # Check for incidents first (highest priority)
+    if any(word in snippet_lower for word in ['fire', 'outbreak', 'incident', 'emergency', 'called', 'call', 'smoke', 'theft', 'stolen']):
+        return 'incident'
+    elif any(word in snippet_lower for word in ['scheduled', 'schedule', 'planned', 'plan']):
         return 'scheduled'
     elif any(word in snippet_lower for word in ['completed', 'complete', 'finished', 'done', 'confirmed', 'confirm']):
         return 'completed'
@@ -216,95 +225,90 @@ def categorize_mention_type(snippet, item_name):
     else:
         return 'mention'
 
+def build_event_signature(text, item_name):
+    """Create a normalized signature to deduplicate repeated events."""
+    text_lower = (text or "").lower()
+    item_tokens = {t for t in re.findall(r"[a-z0-9']+", item_name.lower()) if len(t) > 2}
+    stop_words = {
+        'the', 'and', 'for', 'with', 'from', 'that', 'this', 'were', 'was', 'are', 'is',
+        'has', 'have', 'had', 'been', 'into', 'onto', 'over', 'under', 'their', 'there',
+        'after', 'before', 'about', 'through', 'during', 'when', 'where', 'which', 'while',
+        'meeting', 'board', 'residents', 'resident', 'tower', 'towers', 'unit', 'property',
+        'attick', 'systems', 'system'
+    }
+
+    tokens = []
+    for token in re.findall(r"[a-z0-9']+", text_lower):
+        if len(token) <= 2:
+            continue
+        if token in stop_words or token in item_tokens:
+            continue
+        if token.isdigit():
+            continue
+        tokens.append(token)
+
+    if not tokens:
+        return text_lower.strip()
+
+    # Keep ordered unique tokens so near-duplicate incidents collapse.
+    ordered_unique = list(dict.fromkeys(tokens))
+    return " ".join(ordered_unique[:16])
+
 def generate_item_summary(item_data, mentions):
-    """Generate an engaging KWIC-based narrative summary for an item."""
+    """Generate a three-part narrative summary of an item's timeline."""
     if not mentions:
         return Markup(f"{item_data['name']} was mentioned {item_data['count']} time(s) in the meeting records.")
-    
-    # Extract contextually relevant mentions
-    kwic_mentions = extract_kwic_mentions(item_data['name'], mentions)
-    
-    if not kwic_mentions:
-        # Fallback: use all mentions if no action keywords found
-        kwic_mentions = mentions
-    
-    # Sort chronologically
-    kwic_mentions_sorted = sorted(kwic_mentions, key=lambda x: parse_date_for_sort(x["date"]))
-    
-    # Build narrative with key events
-    narrative_parts = []
-    
-    if kwic_mentions_sorted:
-        first = kwic_mentions_sorted[0]
-        first_type = categorize_mention_type(first["snippet"], item_data['name'])
-        first_date = format_date_short(first['date'])
-        
-        # Opening: First mention with context
-        action = extract_action_context(first["snippet"], first_type)
-        narrative_parts.append(f"The board first talked about {item_data['name'].lower()} in {first_date}.")
-        
-        # Middle events: Key state transitions - pick most significant ones
-        if len(kwic_mentions_sorted) > 1:
-            middle_mentions = kwic_mentions_sorted[1:-1]
-            
-            for mention in middle_mentions[:3]:  # Limit to 3 middle events for brevity
-                mention_type = categorize_mention_type(mention["snippet"], item_data['name'])
-                mention_date = format_date_short(mention['date'])
-                action = extract_action_context(mention["snippet"], mention_type)
-                
-                # Build engaging sentence based on context
-                if mention_type == 'scheduled':
-                    narrative_parts.append(f"In {mention_date}, it {action}.")
-                elif mention_type == 'completed':
-                    narrative_parts.append(f"In {mention_date}, it {action}.")
-                elif mention_type == 'problem' or 'fire' in mention["snippet"].lower() or 'theft' in mention["snippet"].lower():
-                    # Highlight issues
-                    narrative_parts.append(f"But in {mention_date}, {action}.")
-                elif mention_type == 'pending':
-                    narrative_parts.append(f"However, in {mention_date}, {action}.")
-                else:
-                    narrative_parts.append(f"In {mention_date}, {action}.")
-            
-            # Only add no-confirmation note if there's a specific gap after a scheduled action
-            # and the next action doesn't indicate completion
-            if len(kwic_mentions_sorted) >= 3:
-                scheduled_indices = [i for i, m in enumerate(kwic_mentions_sorted) 
-                                    if categorize_mention_type(m["snippet"], item_data['name']) == 'scheduled']
-                
-                for sched_idx in scheduled_indices:
-                    if sched_idx < len(kwic_mentions_sorted) - 1:
-                        next_mention = kwic_mentions_sorted[sched_idx + 1]
-                        next_type = categorize_mention_type(next_mention["snippet"], item_data['name'])
-                        
-                        # Only add note if scheduled action is followed by >6 months gap and NOT completed/confirmed
-                        date1 = parse_date_for_sort(kwic_mentions_sorted[sched_idx]["date"])
-                        date2 = parse_date_for_sort(next_mention["date"])
-                        
-                        if date1 != datetime.min and date2 != datetime.min:
-                            gap_days = (date2 - date1).days
-                            # Only add confirmation note for significant gaps (>6 months) after scheduling
-                            if gap_days > 180 and next_type != 'completed':
-                                # Only add once, and only if not already in narrative
-                                if "There is no confirmation" not in " ".join(narrative_parts):
-                                    narrative_parts.append("There is no confirmation that the previous action took place or not.")
-        
-        # Closing: Last mention (if different from first)
-        if len(kwic_mentions_sorted) > 1:
-            last = kwic_mentions_sorted[-1]
-            last_type = categorize_mention_type(last["snippet"], item_data['name'])
-            last_date = format_date_short(last['date'])
-            last_action = extract_action_context(last["snippet"], last_type)
-            
-            if last_type == 'completed':
-                narrative_parts.append(f"Most recently in {last_date}, {last_action}.")
-            elif last_type == 'pending':
-                narrative_parts.append(f"As of {last_date}, status {last_action}.")
-            else:
-                narrative_parts.append(f"Most recently in {last_date}, {last_action}.")
-    
-    summary = " ".join(narrative_parts)
+
+    mentions_sorted = sorted(mentions, key=lambda x: parse_date_for_sort(x["date"]))
+
+    if len(mentions_sorted) == 1:
+        only = mentions_sorted[0]
+        date_str = format_date_short(only["date"])
+        snippet = " ".join((only["snippet"] or "").split()).strip(" .")
+        summary = f"{item_data['name']} was mentioned once, in {date_str}: {snippet}."
+        summary += f" <a href='#' onclick='toggleTimeline(event)' class='view-timeline-link'>View full timeline →</a>"
+        return Markup(summary)
+
+    first = mentions_sorted[0]
+    last = mentions_sorted[-1]
+    middle = mentions_sorted[1:-1]
+
+    # --- Opening sentence: first chronological mention ---
+    first_date = format_date_short(first["date"])
+    first_snippet = " ".join((first["snippet"] or "").split()).strip(" .")
+    opening = f"In {first_date}, {first_snippet}."
+
+    # --- "Most recently" sentence: last mention ---
+    last_snippet = " ".join((last["snippet"] or "").split()).strip(" .")
+    last_date = format_date_short(last["date"])
+    closing = f"Most recently, in {last_date}, {last_snippet}."
+
+    # --- "Since then" paragraph: deduplicated middle events ---
+    # Build signatures for first and last so we don't echo them in the middle
+    first_sig = build_event_signature(first_snippet, item_data["name"])
+    last_sig = build_event_signature(last_snippet, item_data["name"])
+
+    seen_signatures = {first_sig, last_sig}
+    middle_events = []
+
+    for mention in middle:
+        snippet = " ".join((mention["snippet"] or "").split()).strip(" .")
+        if not snippet:
+            continue
+        sig = build_event_signature(snippet, item_data["name"])
+        if not sig or sig in seen_signatures:
+            continue
+        seen_signatures.add(sig)
+        middle_events.append(snippet)
+
+    if middle_events:
+        since_then = "Since then, " + "; ".join(middle_events) + "."
+        summary = f"{opening} {since_then} {closing}"
+    else:
+        # No meaningful middle — just open and close
+        summary = f"{opening} {closing}"
+
     summary += f" <a href='#' onclick='toggleTimeline(event)' class='view-timeline-link'>View full timeline →</a>"
-    
     return Markup(summary)
 
 
@@ -398,6 +402,7 @@ def item_detail(item_canonical):
         summary = Markup(manual_blurbs[item_canonical])
     else:
         summary = generate_item_summary(item_data, mentions)
+    #summary = generate_item_summary(item_data, mentions)
     
     # Calculate total mentions in system for proportion
     total_system_mentions = sum(sum(item["count"] for item in items) for items in GROUPED_ITEMS.values())

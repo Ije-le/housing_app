@@ -66,3 +66,12 @@ Was hard to connect issues much as I tried.
 Find name for app.
 Write intro: Why are we doing this? What do users stand to gain?
 Look at about page. remove or not.
+
+
+A few errors:
+The app said this:
+
+"entrance door": "In July 2021, residents liked the new Board meeting entrance door at Attick Towers. Most recently, in January 2022, approved payment to Ernie's Lock for $2,312.40.
+
+But when I checked, residents did not say they liked the door they liked the notice placed on the door:
+Ms. Lynn reported that residents of Attick Towers liked the new Board meeting notice posted on the entrance door.

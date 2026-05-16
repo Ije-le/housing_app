@@ -382,13 +382,13 @@ def category_detail(category_name):
 @app.route("/category-breakdown")
 def category_breakdown():
     """Category break down: list all items grouped by category with links to details."""
-    # Build a flattened list of all items and sort alphabetically by display name
+    # Build a flattened list of all items and sort by mention count (highest first)
     full_items = []
     for items in GROUPED_ITEMS.values():
         for it in items:
             full_items.append(it)
 
-    full_items_sorted = sorted(full_items, key=lambda x: x["name"].lower())
+    full_items_sorted = sorted(full_items, key=lambda x: (-x["count"], x["name"].lower()))
 
     return render_template(
         "category_breakdown.html",
